@@ -1,0 +1,21 @@
+1. make a git repository (before 29 Oct)
+    github?
+    Antoine github 
+2. seperate tasks (finish before 31.10)
+    2.2. Scheduling algorithms Y+A
+        DM
+        EDF
+        RR
+    2.3. Scheduler simulator   Y
+    2.4. dataset reader        A
+3. main program
+    3.1. Program inputs (argparse) A
+    3.2. Process exit code         A
+finish before 31.10.2024--------------------------------------
+4. experiments (finish before 06.11)
+    4.1. success rate
+    4.2. plot
+5. report (finish before 09.11)
+    build a overleaf share project (before 29.10)
+        Antoine email of overleaf
+    do it when finish a program module, sametime write a short intro
