@@ -41,14 +41,22 @@ if __name__ == "__main__":
                 period_set.add(int(T))
             for period in period_set:
                 task_set.feasibility_interval = lcm(period, task_set.feasibility_interval)
-
-
     except FileNotFoundError:
         print("File not found, please check the provided path")
     
+    scheduling_function = None
+    if scheduling_algorithm == "dm":
+        scheduling_function = deadline_monotonic
+    elif scheduling_algorithm == "edf":
+        scheduling_function = early_deadline_first
+    elif scheduling_algorithm == "rr":
+        scheduling_function = round_robin
+    else:
+        print("Invalid scheduling algorithm")
+
     print(task_set.tasks)
     preprocessor = Preprocessor(task_set)
     preprocessor.preprocess()
-    schedulePassed = schedule(task_set=task_set, scheduling_function=early_deadline_first, time_max=100, time_step=1)
+    schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=100, time_step=1) # time_max =? task_set.feasibility_interval
     print(schedulePassed)
             
