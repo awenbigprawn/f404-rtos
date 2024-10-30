@@ -2,7 +2,11 @@ import datatypes
 from  priority_function import *
 from preprocessor import *
 import argparse
+import math
 
+
+def lcm(a, b):
+    return abs(a * b) // math.gcd(a, b)
 
 def parseArgs():
     parser = argparse.ArgumentParser()
@@ -17,7 +21,8 @@ if __name__ == "__main__":
     scheduling_algorithm = args.algorithm
     taskset_file = args.file
 
-    task_set = datatypes.TaskSet(tasks=[])
+    task_set = datatypes.TaskSet(tasks=[], feasibility_interval=1)
+    period_set = set()
     try:
         with open(taskset_file, 'r') as file:
             for i, line in enumerate(file):
@@ -33,6 +38,9 @@ if __name__ == "__main__":
                     # priority=0
                 )
                 task_set.tasks.append(new_task)
+                period_set.add(int(T))
+            for period in period_set:
+                task_set.feasibility_interval = lcm(period, task_set.feasibility_interval)
 
 
     except FileNotFoundError:
