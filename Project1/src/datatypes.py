@@ -62,7 +62,7 @@ class TaskSet:
         return jobs
 
 
-def rate_monotonic(job_set: List[Job] ) -> Job:
+def rate_monotonic(job_set: List[Job]) -> Job:
     """
     Returns the job with the shortest period
     """
