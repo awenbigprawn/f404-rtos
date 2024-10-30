@@ -1,4 +1,5 @@
 import datatypes
+from  priority_function import *
 import argparse
 
 
@@ -28,7 +29,7 @@ if __name__ == "__main__":
                     computation_time=int(C),
                     deadline=int(D),
                     period=int(T),
-                    priority=0
+                    # priority=0
                 )
                 task_set.tasks.append(new_task)
 
@@ -37,4 +38,7 @@ if __name__ == "__main__":
         print("File not found, please check the provided path")
     
     print(task_set.tasks)
+
+    schedulePassed = schedule(task_set=task_set, scheduling_function=early_deadline_first, time_max=100, time_step=1)
+    print(schedulePassed)
             
