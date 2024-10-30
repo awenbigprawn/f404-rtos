@@ -61,6 +61,8 @@ class Job:
 @dataclass
 class TaskSet:
     tasks: List[Task]
+    feasibility_interval: int
+    is_implicite_deadline: bool = False
 
     def release_jobs(self, t: int) -> List[Job]:
         """

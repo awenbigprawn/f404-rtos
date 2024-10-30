@@ -1,5 +1,6 @@
 import datatypes
 from  priority_function import *
+from preprocessor import *
 import argparse
 
 
@@ -38,7 +39,8 @@ if __name__ == "__main__":
         print("File not found, please check the provided path")
     
     print(task_set.tasks)
-
+    preprocessor = Preprocessor(task_set)
+    preprocessor.preprocess()
     schedulePassed = schedule(task_set=task_set, scheduling_function=early_deadline_first, time_max=100, time_step=1)
     print(schedulePassed)
             
