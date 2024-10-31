@@ -66,6 +66,7 @@ class Preprocessor:
                 return False
 
         if self.scheduling_algorithm == "dm":
+            # There is exact schedulability check for dm
             # sort tasks by deadline in task_set
             self.task_set.tasks = sorted(self.task_set.tasks, key=lambda task: task.deadline)
             print(self.task_set)
