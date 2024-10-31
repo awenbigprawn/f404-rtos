@@ -52,7 +52,7 @@ class Preprocessor:
 
     def feasibility_check(self) -> bool:
         """
-        Check if the taskset is feasible for the given scheduling algorithm
+        Check if the taskset is feasible for the given scheduling algorithm, and if not sure, do simulation
         """
         # make sure do_simulation init with False
         self.do_simulation = False
@@ -88,7 +88,7 @@ class Preprocessor:
                         return False
                     
                     if wcrt == last_wcrt:
-                        print(f"{task.name} with wcrt = {wcrt} < {task.deadline}, pass")
+                        print(f"{task.name} with wcrt = {wcrt} <= {task.deadline}, pass")
                         break
 
                     last_wcrt = wcrt

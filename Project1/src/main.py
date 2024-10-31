@@ -39,8 +39,8 @@ if __name__ == "__main__":
                 )
                 task_set.tasks.append(new_task)
                 period_set.add(int(T))
-            for period in period_set:
-                task_set.feasibility_interval = lcm(period, task_set.feasibility_interval)
+            # for period in period_set:
+            #     task_set.feasibility_interval = lcm(period, task_set.feasibility_interval)
     except FileNotFoundError:
         print("File not found, please check the provided path")
     
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     is_feasible = preprocessor.preprocess()
 
     if preprocessor.do_simulation:
-        print("Simulation is needed")
+        print(f"Simulation is needed, feasibility interval = {task_set.feasibility_interval}")
         schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=1)
-        print(f"Simulation passed? : {schedulePassed}, simulate time = {task_set.feasibility_interval}")
+        print(f"Simulation passed? : {schedulePassed}")
     else:
         print("Simulation is not needed")
         print(f"Feasibility check passed? : {is_feasible}")
