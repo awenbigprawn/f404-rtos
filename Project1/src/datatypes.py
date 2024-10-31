@@ -61,8 +61,18 @@ class Job:
 @dataclass
 class TaskSet:
     tasks: List[Task]
-    feasibility_interval: int
+    feasibility_interval: int = 0
+    simulator_timestep: int = 1
     is_implicite_deadline: bool = False
+
+
+    def __str__(self):
+        # make a table to list all tasks
+        table = "TaskSet:\n"
+        table += "ID\tName\tC\tT\tD\tO\n"
+        for task in self.tasks:
+            table += str(task.task_id) + "\t" + task.name + "\t" + str(task.computation_time) + "\t" + str(task.period) + "\t" + str(task.deadline) + "\t" + str(task.offset) + "\n"
+        return table
 
     def release_jobs(self, t: int) -> List[Job]:
         """
@@ -86,6 +96,7 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
         jobs.extend(task_set.release_jobs(current_time))
         for job in jobs:
             if job.deadline_missed(current_time):
+                print("Deadline missed for job " + job.name + " at time " + str(current_time))
                 return False
         # schedule the job with the highest priority
         job = scheduling_function(jobs)

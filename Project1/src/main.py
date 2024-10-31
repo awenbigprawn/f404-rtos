@@ -54,9 +54,14 @@ if __name__ == "__main__":
     else:
         print("Invalid scheduling algorithm")
 
-    print(task_set.tasks)
-    preprocessor = Preprocessor(task_set)
-    preprocessor.preprocess()
-    schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=100, time_step=1) # time_max =? task_set.feasibility_interval
-    print(schedulePassed)
-            
+    print(task_set)
+    preprocessor = Preprocessor(task_set, scheduling_algorithm)
+    is_feasible = preprocessor.preprocess()
+
+    if preprocessor.do_simulation:
+        print("Simulation is needed")
+        schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=1)
+        print(f"Simulation passed? : {schedulePassed}, simulate time = {task_set.feasibility_interval}")
+    else:
+        print("Simulation is not needed")
+        print(f"Feasibility check passed? : {is_feasible}")
