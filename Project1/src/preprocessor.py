@@ -11,6 +11,7 @@ class Preprocessor:
         """
         check synchronous, constrained deadline, implicite deadline
         """
+        # init a checker for implicite deadline with True
         temp_implicite_deadline_checker = True
         for task in self.task_set.tasks:
             if task.offset != 0:
@@ -20,7 +21,7 @@ class Preprocessor:
                 print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
                 return False
             if temp_implicite_deadline_checker and task.deadline < task.period:
-                # a task has not implicite deadline
+                # a task has not implicite deadline, set the checker to False
                 temp_implicite_deadline_checker = False
         self.task_set.is_implicite_deadline = temp_implicite_deadline_checker
         return True
@@ -29,7 +30,7 @@ class Preprocessor:
         """
         Set feasibility interval as the maximum deadline of all tasks (Corollary 32), but hyper period when RR
         """
-        if self.scheduling_algorithm == "rr":
+        if self.scheduling_algorithm == "rr" or self.scheduling_algorithm == "edf":
             for task in self.task_set.tasks:
                 self.task_set.feasibility_interval = math.lcm(self.task_set.feasibility_interval, task.period)
         else:

@@ -59,6 +59,7 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
             # an idle points!
             if scheduling_function == early_deadline_first:
                 # Theorem 58, Idle point in EDF
+                print(f"EDF: Idle point at time {current_time}")
                 return True
         # jobs = old jobs + new jobs
         jobs.extend(task_set.release_jobs(current_time))
