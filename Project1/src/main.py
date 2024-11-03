@@ -5,9 +5,6 @@ import argparse
 import math
 
 
-def lcm(a, b):
-    return abs(a * b) // math.gcd(a, b)
-
 def parseArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument("algorithm", help="Scheduling algorithm", choices=["dm", "edf", "rr"])
@@ -39,8 +36,6 @@ if __name__ == "__main__":
                 )
                 task_set.tasks.append(new_task)
                 period_set.add(int(T))
-            # for period in period_set:
-            #     task_set.feasibility_interval = lcm(period, task_set.feasibility_interval)
     except FileNotFoundError:
         print("File not found, please check the provided path")
     

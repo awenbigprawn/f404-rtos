@@ -2,7 +2,7 @@
     github?
     Antoine github 
 2. seperate tasks (finish before 31.10)
-    2.2. Scheduling algorithms Y+A
+    2.2. Scheduling algorithms Y
         DM
         EDF
         RR

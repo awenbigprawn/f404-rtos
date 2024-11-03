@@ -27,11 +27,15 @@ class Preprocessor:
 
     def set_feasibility_interval(self):
         """
-        Set feasibility interval as the maximum deadline of all tasks (Corollary 32)
+        Set feasibility interval as the maximum deadline of all tasks (Corollary 32), but hyper period when RR
         """
-        for task in self.task_set.tasks:
-            if task.deadline > self.task_set.feasibility_interval:
-                self.task_set.feasibility_interval = task.deadline
+        if self.scheduling_algorithm == "rr":
+            for task in self.task_set.tasks:
+                self.task_set.feasibility_interval = math.lcm(self.task_set.feasibility_interval, task.period)
+        else:
+            for task in self.task_set.tasks:
+                if task.deadline > self.task_set.feasibility_interval:
+                    self.task_set.feasibility_interval = task.deadline
 
     def set_simulator_timestep(self):
         """
@@ -64,9 +68,16 @@ class Preprocessor:
             if sum_utilisation > 1:
                 # if sum of utilisation > 1, not feasible, return False
                 return False
+        # if taskset is implicite deadline
+        if self.task_set.is_implicite_deadline:
+            # DM become RM, utilisation check possible:
+            # Theorem 33
+            n_task = len(self.task_set.tasks)
+            if sum_utilisation <= n_task * (2**(n_task) - 1):
+                return True
 
         if self.scheduling_algorithm == "dm":
-            # There is exact schedulability check for dm
+            # There is exact schedulability test for dm
             # sort tasks by deadline in task_set
             self.task_set.tasks = sorted(self.task_set.tasks, key=lambda task: task.deadline)
             print(self.task_set)
@@ -95,7 +106,7 @@ class Preprocessor:
                     last_wcrt = wcrt
                 
                 checked_tasks_list.append(task)
-            # dm no need for simulation, exact feasibility check tells feasibility
+            # dm no need for simulation, exact feasibility check tells FTP feasibility
             return True
         
         if self.scheduling_algorithm == "edf":

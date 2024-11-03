@@ -48,6 +48,35 @@ def round_robin(job_set: List[Job]) -> Job:
     # return the moved Job, now it is on tail
     return job_set[-1]
 
+def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: int) -> bool:
+    """
+    Schedule jobs from the task set using the given scheduling function and time step
+    """
+    jobs:List[Job] = []
+    current_time = 0
+    while current_time < time_max:
+        if jobs == [] and current_time > 0:
+            # an idle points!
+            if scheduling_function == early_deadline_first:
+                # Theorem 58, Idle point in EDF
+                return True
+        # jobs = old jobs + new jobs
+        jobs.extend(task_set.release_jobs(current_time))
+        for job in jobs:
+            if job.deadline_missed(current_time):
+                print("Deadline missed for job " + job.name + " at time " + str(current_time))
+                return False
+        # schedule the job with the highest priority
+        job = scheduling_function(jobs)
+        if job is not None:
+            job.schedule(time_step)
+            if job.computing_time == 0:
+                jobs.remove(job)
+        # schedule the job
+        current_time += time_step
+    return True    
+
+
 
 # testing
 # t1 = Task(1, "T1", computation_time=10, period=20, deadline=18, offset=0)
