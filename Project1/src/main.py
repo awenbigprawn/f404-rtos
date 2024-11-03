@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     if preprocessor.do_simulation:
         print(f"Simulation is needed, feasibility interval = {task_set.feasibility_interval}")
-        schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=1)
+        schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=task_set.simulator_timestep)
         print(f"Simulation passed? : {schedulePassed}")
         if(schedulePassed):
             exit(0)
