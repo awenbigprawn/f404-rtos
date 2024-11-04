@@ -58,13 +58,17 @@ if __name__ == "__main__":
         schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=task_set.simulator_timestep)
         print(f"Simulation passed? : {schedulePassed}")
         if(schedulePassed):
+            print("exit 0")
             exit(0)
         else:
+            print("exit 2")
             exit(2)
     else:
         print("Simulation is not needed")
         print(f"Feasibility check passed? : {is_feasible}")
         if(is_feasible):
+            print("exit 1")
             exit(1)
         else:
+            print("exit 3")
             exit(3)
