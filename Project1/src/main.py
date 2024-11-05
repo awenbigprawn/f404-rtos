@@ -1,5 +1,5 @@
 import datatypes
-from  priority_function import *
+from  scheduling_functions import *
 from preprocessor import *
 import argparse
 import math
