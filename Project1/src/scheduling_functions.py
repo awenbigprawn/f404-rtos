@@ -24,7 +24,7 @@ def deadline_monotonic(job_set: List[Job]) -> Job:
             # error, there is no ddl for this job
             raise ValueError("DM scheduling: No task for the job" + str(job.job_id))
         if highest_priority_job is None or job.task.deadline < highest_priority_job.task.deadline: 
-            # deadline here must be tasks ddl, not the absolute ddl ddl of each job
+            # deadline here must be tasks ddl, not the absolute ddl of each job
             highest_priority_job = job
     return highest_priority_job
 
