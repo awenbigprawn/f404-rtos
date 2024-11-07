@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # if edf fail, it is FJP infeasible also FTP infeasible
         infeasible_count = exit_code_counts[2] + exit_code_counts[3]
     else:
-        failure_count = exit_code_counts[2] + exit_code_counts[3] - exit_code_counts[4]
+        failure_count = exit_code_counts[2] + exit_code_counts[3]
         infeasible_count = exit_code_counts[4]
     for code, count in exit_code_counts.items():
         print(f"Exit code {code}: {count} times")
