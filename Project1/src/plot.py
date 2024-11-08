@@ -5,8 +5,6 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 def run_main_py(taskset_dir, chosenAlg):
-    # algorithms = ["dm", "edf", "rr"]
-    # chosenAlg = algorithms[1]
     exit_code_counts = defaultdict(int)
 
     for root, _, files in os.walk(taskset_dir):
@@ -47,7 +45,7 @@ if __name__ == "__main__":
     success_count = exit_code_counts[0] + exit_code_counts[1]
     if chosenAlg == "edf":
         failure_count = 0
-        # if edf fail, it is FJP infeasible also FTP infeasible
+        # if edf fail, it is FJP/FTP infeasible
         infeasible_count = exit_code_counts[2] + exit_code_counts[3]
     else:
         failure_count = exit_code_counts[2] + exit_code_counts[3]
