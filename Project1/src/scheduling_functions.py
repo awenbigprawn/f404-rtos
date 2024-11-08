@@ -76,16 +76,3 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
         # schedule the job
         current_time += time_step
     return True    
-
-
-
-# testing
-# t1 = Task(1, "T1", computation_time=10, period=20, deadline=18, offset=0)
-# t2 = Task(2, "T2", computation_time=6, period=20, deadline=20, offset=0)
-# t3 = Task(3, "T3", computation_time=2, period=10, deadline=10, offset=0)
-
-# ts1 = TaskSet([t1, t2, t3])
-# print(ts1)
-
-# schedulePassed = schedule(task_set=ts1, scheduling_function=early_deadline_first, time_max=100, time_step=1)
-# print(schedulePassed)
