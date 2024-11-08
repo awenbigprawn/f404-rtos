@@ -6,6 +6,9 @@ import math
 
 
 def parseArgs():
+    """
+    parse command line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("algorithm", help="Scheduling algorithm", choices=["dm", "edf", "rr"])
     parser.add_argument("file", help="TaskSet file")
