@@ -3,6 +3,7 @@ from  scheduling_functions import *
 from preprocessor import *
 import argparse
 import math
+import os
 
 
 def parseArgs():
@@ -10,16 +11,49 @@ def parseArgs():
     parse command line arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("algorithm", help="Scheduling algorithm", choices=["dm", "edf", "rr"])
-    parser.add_argument("file", help="TaskSet file")
+    # Positional arguments
+    parser.add_argument("file", help="Task file")
+    parser.add_argument("m", type=int, help="Number of cores to allocate")
+
+    # EDF version
+    parser.add_argument("-v", required=True, help="Version of EDF to use ('global', 'partitioned', or <k> (for EDF^k))")
+
+    # Optional arguments
+    parser.add_argument("-w", type=int, help="Number of workers (default: # of cpu cores on the machine)")
+    parser.add_argument("-h", help="Heuristic for partitioned EDF", choices=["ff", "nf", "bf", "wf"])
+    parser.add_argument("-s", help="Ordering of tasks for partitioned EDF", choices=["iu", "du"])
+
     args = parser.parse_args()
+
+    # Validate -v option
+    if args.v == "partitioned":
+        if args.h is None or args.s is None:
+            parser.error("When 'partitioned' is selected, -h (heuristic) and -s (ordering) must be provided")
+    elif args.v == "global":
+        pass
+    else:
+        try:
+            args.v = int(args.v)
+        except ValueError:
+            parser.error("-v must be followed by 'global', 'partitioned', or an integer value for <k> (for EDF^k)")
+
     return args
 
 
 if __name__ == "__main__":
     args = parseArgs()
-    scheduling_algorithm = args.algorithm
     taskset_file = args.file
+    num_cores = int(args.m)
+    scheduling_algorithm = args.v
+
+    if args.w is not None:
+        num_workers = args.w
+    else:
+        num_workers = os.cpu_count()
+
+    heuristic = args.h
+    ordering = args.s
+    
 
     task_set = datatypes.TaskSet(tasks=[], feasibility_interval=1)
     period_set = set()
