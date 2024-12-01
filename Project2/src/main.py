@@ -35,8 +35,7 @@ def parseArgs():
         try:
             args.v = int(args.v)
         except ValueError:
-            parser.error("-v must be followed by 'global', 'partitioned', or an integer value for <k> (for EDF^k)")
-
+            parser.error("-v must be followed by 'global', 'partitioned', or an integer value for <k> (for EDF^k)")         
     return args
 
 
