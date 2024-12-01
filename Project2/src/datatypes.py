@@ -1,6 +1,6 @@
 # Purpose: Defines the data types Tasks, Job and TaskSet
 from typing import List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Task:
@@ -11,6 +11,13 @@ class Task:
     deadline: int
     # priority: int
     offset: int
+    utilization: float = field(init=False)
+
+    def __post_init__(self):
+        self.utilization = self.computation_time / self.period
+
+    def __str__(self):
+        return "Task: " + self.name + " " + str(self.computation_time) + " " + str(self.period) + " " + str(self.deadline) + " " + str(self.offset) + " " + str(self.utilization)
 
     def release_job(self, t:int) -> 'Job':
         """
