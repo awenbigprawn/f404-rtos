@@ -137,6 +137,7 @@ class Partitioner:
                         # not improving
                         continue
                     if self.is_smaller_or_equal(processor.load, min_load):
+                        # is actually improving, if equal, it should be continued in the if before
                         worst_processor = processor
                         min_load = processor.load
             if worst_processor is None:
