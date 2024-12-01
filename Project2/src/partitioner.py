@@ -14,10 +14,10 @@ class Processor:
         return f"Processor{self.processor_id}: Capacity: {self.capacity}, Load: {self.load:.2f}"
 
 class Partitioner:
-    def __init__(self, task_set: TaskSet, processors: List[Processor]) -> None:
+    def __init__(self, task_set: TaskSet, processors: List[Processor], ordering) -> None:
         self.task_set = task_set
         self.processors = processors
-        self.partitions = []
+        self.ordering = ordering
         self.epsilon = 1e-15
 
     def is_greater_or_equal(self, a, b):
@@ -41,7 +41,13 @@ class Partitioner:
         
         # partition the task set into processors
         # sort task set by utilization
-        self.task_set.tasks.sort(key=lambda x: x.utilization, reverse=True)
+        if self.ordering == "iu":
+            # increase utilization order
+            self.task_set.tasks.sort(key=lambda x: x.utilization)
+        elif self.ordering == "du":
+            # decrease utilization order
+            self.task_set.tasks.sort(key=lambda x: x.utilization, reverse=True)
+        
         # assign tasks to processors
         if partition_method == "first_fit":
             self.first_fit()
@@ -162,7 +168,7 @@ test_processors = [Processor(1),
                    Processor(3),
                    Processor(4)]
 
-test_partitioner = Partitioner(test_taskset, test_processors)
+test_partitioner = Partitioner(test_taskset, test_processors, "iu")
 test_partitioner.partition("best_fit")
 for processor in test_processors:
     print(processor)
