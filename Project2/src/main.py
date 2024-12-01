@@ -10,7 +10,7 @@ def parseArgs():
     """
     parse command line arguments
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
     # Positional arguments
     parser.add_argument("file", help="Task file")
     parser.add_argument("m", type=int, help="Number of cores to allocate")
@@ -51,8 +51,9 @@ if __name__ == "__main__":
     else:
         num_workers = os.cpu_count()
 
-    heuristic = args.h
-    ordering = args.s
+    if scheduling_algorithm == "partitioned":
+        heuristic = args.h
+        ordering = args.s
     
 
     task_set = datatypes.TaskSet(tasks=[], feasibility_interval=1)
