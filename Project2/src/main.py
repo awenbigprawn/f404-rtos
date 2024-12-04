@@ -6,6 +6,8 @@ import argparse
 import math
 import os
 
+import concurrent.futures
+
 
 def parseArgs():
     """
@@ -102,6 +104,16 @@ if __name__ == "__main__":
         for processor in cores:
             print(processor)
             print(processor.task_set)
+
+
+        def run_processor(processor):
+            schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=task_set.feasibility_interval, time_step=task_set.simulator_timestep)
+            return f"Processor {processor.processor_id} passed? : {schedulePassed}"
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+            results = executor.map(run_processor, cores)
+            for result in results:
+                print(result)
     
     elif scheduling_algorithm == "global":
         #TODO: IMPLEMENT global
