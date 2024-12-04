@@ -116,8 +116,39 @@ if __name__ == "__main__":
                 print(result)
     
     elif scheduling_algorithm == "global":
-        #TODO: IMPLEMENT global
-        pass
+        # for now single threaded implementation
+        schedulable = True
+        time_max = task_set.feasibility_interval
+        time_step = task_set.simulator_timestep
+        jobs = []
+        current_time = 0
+        while current_time < time_max:
+            # Release new jobs at current time
+            new_jobs = task_set.release_jobs(current_time)
+            jobs.extend(new_jobs)
+
+            # Remove completed jobs
+            jobs = [job for job in jobs if job.computing_time > 0]
+
+            # Check for deadline misses
+            for job in jobs:
+                if job.deadline_missed(current_time):
+                    print(f"Deadline missed for job {job.name} at time {current_time}")
+                    schedulable = False
+
+            # Sort jobs by earliest deadline
+            jobs.sort(key=lambda job: job.deadline)
+
+            # Select up to num_cores jobs to schedule
+            scheduled_jobs = jobs[:num_cores]
+
+            # Schedule selected jobs
+            for job in scheduled_jobs:
+                job.schedule(time_step)
+
+            current_time += time_step
+
+        print(f"Global EDF scheduling passed? : {schedulable}")
 
     else:
         #TODO: IMPLEMENT edf^k
