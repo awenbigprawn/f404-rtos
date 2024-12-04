@@ -1,6 +1,7 @@
 import datatypes
 from  scheduling_functions import *
 from preprocessor import *
+from partitioner import *
 import argparse
 import math
 import os
@@ -75,20 +76,30 @@ if __name__ == "__main__":
                 period_set.add(int(T))
     except FileNotFoundError:
         print("File not found, please check the provided path")
+
+    processor_list = []
+    for i in range(num_cores):
+        processor_list.append(Processor(i))
     
+    print(task_set)
+    
+    # start processing
     scheduling_function = None
-    if scheduling_algorithm == "dm":
-        scheduling_function = deadline_monotonic
-    elif scheduling_algorithm == "edf":
+    if scheduling_algorithm == "partitioned":
+        partitioner = Partitioner(task_set, processor_list, ordering)
         scheduling_function = early_deadline_first
-    elif scheduling_algorithm == "rr":
-        scheduling_function = round_robin
+        partitioner.partition(heuristic)
+
+        for iProcessor in processor_list:
+            preprocessor = Preprocessor(task_set, "EDF")
+            is_feasible = preprocessor.preprocess()
+            print(f"{iProcessor} is feasible? : {is_feasible}")
+
+    elif scheduling_algorithm == "global":
+        # TODO: add global scheduling function
+        scheduling_function = early_deadline_first
     else:
         print("Invalid scheduling algorithm")
-
-    print(task_set)
-    preprocessor = Preprocessor(task_set, scheduling_algorithm)
-    is_feasible = preprocessor.preprocess()
 
     if preprocessor.do_simulation:
         print(f"Simulation is needed, feasibility interval = {task_set.feasibility_interval}")
