@@ -83,24 +83,33 @@ if __name__ == "__main__":
     
     cores = [Processor(i) for i in range(num_cores)]
 
-    partitioner = Partitioner(task_set, cores, ordering)
+    if scheduling_algorithm == "partitioned":
+        partitioner = Partitioner(task_set, cores, ordering)
+        
+        partitioner_method = None
+        match heuristic:
+            case "ff":
+                partitioner_method = "first_fit"
+            case "nf":
+                partitioner_method = "next_fit"
+            case "bf":
+                partitioner_method = "best_fit"
+            case "wf":
+                partitioner_method = "worst_fit"
+        
+        partitioner.partition(partitioner_method)
+        
+        for processor in cores:
+            print(processor)
+            print(processor.task_set)
     
-    partitioner_method = None
-    match heuristic:
-        case "ff":
-            partitioner_method = "first_fit"
-        case "nf":
-            partitioner_method = "next_fit"
-        case "bf":
-            partitioner_method = "best_fit"
-        case "wf":
-            partitioner_method = "worst_fit"
-    
-    partitioner.partition(partitioner_method)
-    
-    for processor in cores:
-        print(processor)
-        print(processor.task_set)
+    elif scheduling_algorithm == "global":
+        #TODO: IMPLEMENT global
+        pass
+
+    else:
+        #TODO: IMPLEMENT edf^k
+        pass
 
     """
     preprocessor = Preprocessor(task_set, scheduling_algorithm)
