@@ -74,7 +74,8 @@ class Partitioner:
             if not find_processor_flag:
                 print(f"first_fit: No free processor found for task {task.task_id}")
                 #TODO: not schedulable for first fit
-                return
+                return False
+        return True
             
     def next_fit(self):
         # Next-ﬁt: assign it to the current processor being considered, and if it cannot ﬁt, it moves to the next available processor. 
@@ -92,8 +93,10 @@ class Partitioner:
                     break
         if taskset_list:
             print(f"next_fit: No free processor found for task {taskset_list[0].task_id}")
-        #TODO: not schedulable for next fit
-        return
+            # not schedulable for next fit
+            return False
+        else:
+            return True
 
     def best_fit(self):
         # Best-ﬁt: assign it to an eligible processor with the maximum load U(tau)
@@ -120,10 +123,11 @@ class Partitioner:
             if best_processor is None:
                 print(f"best_fit: No free processor found for task {task.task_id}")
                 #TODO: not schedulable for best fit
-                return
+                return False
             else:
                 best_processor.task_set.tasks.append(task)
                 best_processor.load += task.utilization
+        return True
 
     def worst_fit(self):
         # Worst-ﬁt: assign it to an eligible processor with the minimum load U(tau)
@@ -149,27 +153,28 @@ class Partitioner:
             if worst_processor is None:
                 print(f"worst_fit: No free processor found for task {task.task_id}")
                 #TODO: not schedulable for worst fit
-                return
+                return False
             else:
                 worst_processor.task_set.tasks.append(task)
                 worst_processor.load += task.utilization
+        return True
 
 # tests
-test_taskset = TaskSet([Task(1, "task1", 8, 10, 10, 0), 
-                        Task(2, "task2", 7, 10, 10, 0), 
-                        Task(3, "task3", 6, 10, 10, 0), 
-                        Task(4, "task4", 5, 10, 10, 0), 
-                        Task(5, "task5", 4, 10, 10, 0),
-                        Task(6, "task6", 2, 10, 10, 0),
-                        Task(7, "task7", 1, 10, 10, 0)])
-print(test_taskset)
-test_processors = [Processor(1), 
-                   Processor(2), 
-                   Processor(3),
-                   Processor(4)]
+# test_taskset = TaskSet([Task(1, "task1", 8, 10, 10, 0), 
+#                         Task(2, "task2", 7, 10, 10, 0), 
+#                         Task(3, "task3", 6, 10, 10, 0), 
+#                         Task(4, "task4", 5, 10, 10, 0), 
+#                         Task(5, "task5", 4, 10, 10, 0),
+#                         Task(6, "task6", 2, 10, 10, 0),
+#                         Task(7, "task7", 1, 10, 10, 0)])
+# print(test_taskset)
+# test_processors = [Processor(1), 
+#                    Processor(2), 
+#                    Processor(3),
+#                    Processor(4)]
 
-test_partitioner = Partitioner(test_taskset, test_processors, "iu")
-test_partitioner.partition("best_fit")
-for processor in test_processors:
-    print(processor)
-    print(processor.task_set)
+# test_partitioner = Partitioner(test_taskset, test_processors, "iu")
+# test_partitioner.partition("best_fit")
+# for processor in test_processors:
+#     print(processor)
+#     print(processor.task_set)
