@@ -81,25 +81,30 @@ if __name__ == "__main__":
     for i in range(num_cores):
         processor_list.append(Processor(i))
     
-    print(task_set)
+    cores = [Processor(i) for i in range(num_cores)]
+
+    partitioner = Partitioner(task_set, cores, ordering)
     
-    # start processing
-    scheduling_function = None
-    if scheduling_algorithm == "partitioned":
-        partitioner = Partitioner(task_set, processor_list, ordering)
-        scheduling_function = early_deadline_first
-        partitioner.partition(heuristic)
+    partitioner_method = None
+    match heuristic:
+        case "ff":
+            partitioner_method = "first_fit"
+        case "nf":
+            partitioner_method = "next_fit"
+        case "bf":
+            partitioner_method = "best_fit"
+        case "wf":
+            partitioner_method = "worst_fit"
+    
+    partitioner.partition(partitioner_method)
+    
+    for processor in cores:
+        print(processor)
+        print(processor.task_set)
 
-        for iProcessor in processor_list:
-            preprocessor = Preprocessor(task_set, "EDF")
-            is_feasible = preprocessor.preprocess()
-            print(f"{iProcessor} is feasible? : {is_feasible}")
-
-    elif scheduling_algorithm == "global":
-        # TODO: add global scheduling function
-        scheduling_function = early_deadline_first
-    else:
-        print("Invalid scheduling algorithm")
+    """
+    preprocessor = Preprocessor(task_set, scheduling_algorithm)
+    is_feasible = preprocessor.preprocess()
 
     if preprocessor.do_simulation:
         print(f"Simulation is needed, feasibility interval = {task_set.feasibility_interval}")
@@ -119,4 +124,4 @@ if __name__ == "__main__":
             exit(1)
         else:
             print("exit 3")
-            exit(3)
+            exit(3)"""

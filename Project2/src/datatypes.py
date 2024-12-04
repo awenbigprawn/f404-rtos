@@ -70,6 +70,7 @@ class TaskSet:
     tasks: List[Task]
     feasibility_interval: int = 0
     simulator_timestep: int = 1
+    is_synchronous: bool = False
     is_implicite_deadline: bool = False
 
 

@@ -159,22 +159,24 @@ class Partitioner:
                 worst_processor.load += task.utilization
         return True
 
-# tests
-# test_taskset = TaskSet([Task(1, "task1", 8, 10, 10, 0), 
-#                         Task(2, "task2", 7, 10, 10, 0), 
-#                         Task(3, "task3", 6, 10, 10, 0), 
-#                         Task(4, "task4", 5, 10, 10, 0), 
-#                         Task(5, "task5", 4, 10, 10, 0),
-#                         Task(6, "task6", 2, 10, 10, 0),
-#                         Task(7, "task7", 1, 10, 10, 0)])
-# print(test_taskset)
-# test_processors = [Processor(1), 
-#                    Processor(2), 
-#                    Processor(3),
-#                    Processor(4)]
 
-# test_partitioner = Partitioner(test_taskset, test_processors, "iu")
-# test_partitioner.partition("best_fit")
-# for processor in test_processors:
-#     print(processor)
-#     print(processor.task_set)
+if __name__ == "__main__":
+    # tests
+    test_taskset = TaskSet([Task(1, "task1", 8, 10, 10, 0), 
+                            Task(2, "task2", 7, 10, 10, 0), 
+                            Task(3, "task3", 6, 10, 10, 0), 
+                            Task(4, "task4", 5, 10, 10, 0), 
+                            Task(5, "task5", 4, 10, 10, 0),
+                            Task(6, "task6", 2, 10, 10, 0),
+                            Task(7, "task7", 1, 10, 10, 0)])
+    print(test_taskset)
+    test_processors = [Processor(1), 
+                    Processor(2), 
+                    Processor(3),
+                    Processor(4)]
+
+    test_partitioner = Partitioner(test_taskset, test_processors, "iu")
+    test_partitioner.partition("best_fit")
+    for processor in test_processors:
+        print(processor)
+        print(processor.task_set)

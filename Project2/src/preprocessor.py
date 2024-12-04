@@ -13,13 +13,14 @@ class Preprocessor:
         """
         # init a checker for implicite deadline with True
         temp_implicite_deadline_checker = True
+        temp_synchronous_checker = True
         for task in self.task_set.tasks:
-            if task.offset != 0:
+            if temp_synchronous_checker and task.offset != 0:
+                temp_synchronous_checker = False
                 print(task.name + " has a non-zero offset, taskset is asynchronous")
-                return False
             if task.deadline > task.period:
                 print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
-                return False
+                
             if temp_implicite_deadline_checker and task.deadline < task.period:
                 # a task has not implicite deadline, set the checker to False
                 temp_implicite_deadline_checker = False
