@@ -139,7 +139,7 @@ if __name__ == "__main__":
             # Sort jobs by earliest deadline
             jobs.sort(key=lambda job: job.deadline)
 
-            # Select up to num_cores jobs to schedule
+            # Select up to m jobs to schedule on m cores
             scheduled_jobs = jobs[:num_cores]
 
             # Schedule selected jobs
