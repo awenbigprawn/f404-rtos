@@ -1,6 +1,7 @@
 import datatypes
 from  scheduling_functions import *
 from preprocessor import *
+from partitioner import *
 import argparse
 import math
 import os
@@ -76,17 +77,28 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print("File not found, please check the provided path")
     
-    scheduling_function = None
-    if scheduling_algorithm == "dm":
-        scheduling_function = deadline_monotonic
-    elif scheduling_algorithm == "edf":
-        scheduling_function = early_deadline_first
-    elif scheduling_algorithm == "rr":
-        scheduling_function = round_robin
-    else:
-        print("Invalid scheduling algorithm")
+    cores = [Processor(i) for i in range(num_cores)]
 
-    print(task_set)
+    partitioner = Partitioner(task_set, cores, ordering)
+    
+    partitioner_method = None
+    match heuristic:
+        case "ff":
+            partitioner_method = "first_fit"
+        case "nf":
+            partitioner_method = "next_fit"
+        case "bf":
+            partitioner_method = "best_fit"
+        case "wf":
+            partitioner_method = "worst_fit"
+    
+    partitioner.partition(partitioner_method)
+    
+    for processor in cores:
+        print(processor)
+        print(processor.task_set)
+
+    """
     preprocessor = Preprocessor(task_set, scheduling_algorithm)
     is_feasible = preprocessor.preprocess()
 
@@ -108,4 +120,4 @@ if __name__ == "__main__":
             exit(1)
         else:
             print("exit 3")
-            exit(3)
+            exit(3)"""
