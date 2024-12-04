@@ -12,19 +12,39 @@ class Preprocessor:
         check synchronous, constrained deadline, implicite deadline
         """
         # init a checker for implicite deadline with True
-        temp_implicite_deadline_checker = True
         temp_synchronous_checker = True
+        temp_implicite_deadline_checker = True
+        temp_constrained_deadline_checker = True
         for task in self.task_set.tasks:
+            # check synchronous
             if temp_synchronous_checker and task.offset != 0:
                 temp_synchronous_checker = False
                 print(task.name + " has a non-zero offset, taskset is asynchronous")
-            if task.deadline > task.period:
-                print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
-                
+            # check deadline type
             if temp_implicite_deadline_checker and task.deadline < task.period:
                 # a task has not implicite deadline, set the checker to False
                 temp_implicite_deadline_checker = False
-        self.task_set.is_implicite_deadline = temp_implicite_deadline_checker
+                print(task.name + " has a deadline smaller than its period, taskset has not implicite deadline")
+            if task.deadline > task.period:
+                print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
+                temp_constrained_deadline_checker = False
+
+        # set the task_set properties
+        if temp_synchronous_checker:
+            self.task_set.is_synchronous = True
+            print("taskset is synchronous")
+        else:
+            self.task_set.is_synchronous = False
+            print("taskset is asynchronous")
+        if temp_implicite_deadline_checker and temp_constrained_deadline_checker:
+            self.task_set.deadline_type = "implicite"
+            print("taskset has implicite deadline")
+        elif temp_constrained_deadline_checker:
+            self.task_set.deadline_type = "constrained"
+            print("taskset has constrained deadline")
+        else:
+            self.task_set.deadline_type = "arbitrary"
+            print("taskset has arbitrary deadline")
         return True
 
     def set_feasibility_interval(self):
@@ -131,7 +151,7 @@ class Preprocessor:
         Preprocess the taskset to seek shortcuts
         """
         if not self.check_taskset_properties():
-            raise ValueError("Taskset is not synchronous with constrained deadline, check input taskset")
+            raise ValueError("Taskset is not with constrained deadline, check input taskset")
 
         shortcut_is_feasible = self.feasibility_check()
 

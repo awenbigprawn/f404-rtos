@@ -71,8 +71,7 @@ class TaskSet:
     feasibility_interval: int = 0
     simulator_timestep: int = 1
     is_synchronous: bool = False
-    is_implicite_deadline: bool = False
-
+    deadline_type = "arbitrary" # arbitrary, constrained, implicite
 
     def __str__(self):
         # make a table to list all tasks
