@@ -6,6 +6,8 @@ import argparse
 import math
 import os
 
+import concurrent.futures
+
 
 def parseArgs():
     """
@@ -97,40 +99,71 @@ if __name__ == "__main__":
             case "wf":
                 partitioner_method = "worst_fit"
         
-        partitioner.partition(partitioner_method)
+        partition_is_possible = partitioner.partition(partitioner_method)
+        print(f"Partitioner passed? : {partition_is_possible}")
         
         for processor in cores:
             print(processor)
             print(processor.task_set)
-    
-    partitioner_method = None
-    match heuristic:
-        case "ff":
-            partitioner_method = "first_fit"
-        case "nf":
-            partitioner_method = "next_fit"
-        case "bf":
-            partitioner_method = "best_fit"
-        case "wf":
-            partitioner_method = "worst_fit"
-    
-    partition_is_feasible = partitioner.partition(partitioner_method)
-    print(f"Partitioner passed? : {partition_is_feasible}")
-    
-    if partition_is_feasible:
-        for processor in cores:
-            print(processor)
-            print(processor.task_set)
-            preprocessor = Preprocessor(processor.task_set, "edf")
-            prep_is_feasible = preprocessor.preprocess()
-            print(f"Feasibility check preprocess passed? : {prep_is_feasible}")
-            if prep_is_feasible:
-                print(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
-                if preprocessor.do_simulation:
-                    print(f"Simulation is needed, feasibility interval = {processor.task_set.feasibility_interval}")
-                    schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
-                    print(f"Simulation passed? : {schedulePassed}")
-            
+
+
+        def run_processor(processor):
+            for processor in cores:
+                print(processor)
+                print(processor.task_set)
+                preprocessor = Preprocessor(processor.task_set, "edf")
+                prep_is_feasible = preprocessor.preprocess()
+                print(f"Feasibility check preprocess passed? : {prep_is_feasible}")
+                if prep_is_feasible:
+                    print(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
+                    if preprocessor.do_simulation:
+                        print(f"Simulation is needed, feasibility interval = {processor.task_set.feasibility_interval}")
+                        schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
+                        print(f"Simulation passed? : {schedulePassed}")
+            return f"Processor {processor.processor_id} passed? : {schedulePassed}"
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+            results = executor.map(run_processor, cores)
+            for result in results:
+                print(result)
+        
+     
+    elif scheduling_algorithm == "global":
+        # for now single threaded implementation
+        schedulable = True
+        time_max = task_set.feasibility_interval
+        time_step = task_set.simulator_timestep
+        jobs = []
+        current_time = 0
+        while current_time < time_max:
+            # Release new jobs at current time
+            new_jobs = task_set.release_jobs(current_time)
+            jobs.extend(new_jobs)
+
+            # Remove completed jobs
+            jobs = [job for job in jobs if job.computing_time > 0]
+
+            # Check for deadline misses
+            for job in jobs:
+                if job.deadline_missed(current_time):
+                    print(f"Deadline missed for job {job.name} at time {current_time}")
+                    schedulable = False
+
+            # Sort jobs by earliest deadline
+            jobs.sort(key=lambda job: job.deadline)
+
+            # Select up to m jobs to schedule on m cores
+            scheduled_jobs = jobs[:num_cores]
+
+            # Schedule selected jobs
+            for job in scheduled_jobs:
+                job.schedule(time_step)
+
+            current_time += time_step
+
+        print(f"Global EDF scheduling passed? : {schedulable}")
+
+
     else:
         for processor in cores:
             print(processor)
