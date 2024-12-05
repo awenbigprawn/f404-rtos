@@ -1,5 +1,6 @@
 from datatypes import *
 import math
+import help_functions
 
 class Preprocessor:
     def __init__(self, task_set: TaskSet, scheduling_algorithm: str):
@@ -7,7 +8,7 @@ class Preprocessor:
         self.scheduling_algorithm = scheduling_algorithm
         self.do_simulation = False
 
-    def check_taskset_properties(self) -> bool:
+    def check_taskset_properties(self):
         """
         check synchronous, constrained deadline, implicite deadline
         """
@@ -36,6 +37,7 @@ class Preprocessor:
         else:
             self.task_set.is_synchronous = False
             print("taskset is asynchronous")
+
         if temp_implicite_deadline_checker and temp_constrained_deadline_checker:
             self.task_set.deadline_type = "implicite"
             print("taskset has implicite deadline")
@@ -45,23 +47,50 @@ class Preprocessor:
         else:
             self.task_set.deadline_type = "arbitrary"
             print("taskset has arbitrary deadline")
-        return True
 
-    def set_feasibility_interval(self):
+    def set_feasibility_interval(self) -> None:
         """
-        Set feasibility interval as the maximum deadline of all tasks (Corollary 32), but hyper period when RR
+        Set the feasibility interval.
+        For synchronous task sets:
+        * constrainted ddl:
+            - For rr, use the hyperperiod
+            - For edf, use the hyperperiod first, it will stop early when idle point found (Corollary 59)
+            - For other FTP algorithms, use the maximum deadline among all tasks (corollary 32)
+        * arbitrary ddl:
+            - use the hyperperiod first, it will stop early when idle point found (Theorem 40)
+        For asynchronous task sets:
+        - Use Omax + 2P, where Omax is the maximum offset and P is the hyperperiod
         """
-        if self.scheduling_algorithm == "rr" or self.scheduling_algorithm == "edf":
-            for task in self.task_set.tasks:
-                self.task_set.feasibility_interval = math.lcm(self.task_set.feasibility_interval, task.period)
+        if self.task_set.is_synchronous:
+            self._set_synchronous_feasibility_interval()
         else:
-            for task in self.task_set.tasks:
-                if task.deadline > self.task_set.feasibility_interval:
-                    self.task_set.feasibility_interval = task.deadline
+            self._set_asynchronous_feasibility_interval()
+
+    def _set_synchronous_feasibility_interval(self) -> None:
+        if self.task_set.deadline_type == "implicite" or self.task_set.deadline_type == "constrained":
+            if self.scheduling_algorithm in ["rr", "edf"]:
+                self.task_set.feasibility_interval = self._calculate_hyper_period()
+            else:
+                self.task_set.feasibility_interval = max(task.deadline for task in self.task_set.tasks)
+        elif self.task_set.deadline_type == "arbitrary":
+            # arbitrary deadline, need find idle point, set feasibility interval to hyper period first
+            self.task_set.feasibility_interval = self._calculate_hyper_period()
+        else:
+            print("Error: taskset has no correct deadline type")
+            # for safety, set hyper period
+            self.task_set.feasibility_interval = self._calculate_hyper_period()
+
+    def _set_asynchronous_feasibility_interval(self) -> None:
+        Omax = max(task.offset for task in self.task_set.tasks)
+        hyper_period = self._calculate_hyper_period()
+        self.task_set.feasibility_interval = Omax + 2 * hyper_period
+
+    def _calculate_hyper_period(self) -> int:
+        return math.lcm(*(task.period for task in self.task_set.tasks))
 
     def set_simulator_timestep(self):
         """
-        Set the simulator timestep as the greatest common divisor of all tasks' C, T, D
+        Set the simulator timestep as the greatest common divisor of all tasks' C, T, D, O
         """
         def find_gcd(list_numbers):
             num1 = list_numbers[0]
@@ -69,10 +98,10 @@ class Preprocessor:
                 num1 = math.gcd(num1, num2)
             return num1
         
-        # find the greatest common divisor of all tasks' C, T, D
+        # find the greatest common divisor of all tasks' C, T, D, O
         temp_CTD_list = []
         for task in self.task_set.tasks:
-            temp_CTD_list.extend([task.computation_time, task.period, task.deadline])
+            temp_CTD_list.extend([task.computation_time, task.period, task.deadline, task.offset])
 
         self.task_set.simulator_timestep = find_gcd(temp_CTD_list)
 
@@ -86,16 +115,20 @@ class Preprocessor:
         # utilisation check
         sum_utilisation = 0.0
         for task in self.task_set.tasks:
-            sum_utilisation += task.computation_time / task.period
-            if sum_utilisation > 1:
+            sum_utilisation += task.utilization
+            if help_functions.is_greater(sum_utilisation, 1):
                 # if sum of utilisation > 1, not feasible, return False
                 return False
         # if taskset is implicite deadline
-        if self.task_set.is_implicite_deadline:
+        if self.task_set.deadline_type == "implicite":
             # DM become RM, utilisation check possible:
             # Theorem 33
             n_task = len(self.task_set.tasks)
-            if sum_utilisation <= n_task * (2**(n_task) - 1):
+            if n_task > 0:
+                if sum_utilisation <= n_task * (2**(1/n_task) - 1):
+                    return True
+            else:
+                print("taskset has no task")
                 return True
 
         if self.scheduling_algorithm == "dm":
@@ -133,7 +166,7 @@ class Preprocessor:
         
         if self.scheduling_algorithm == "edf":
             # edf is ideal for implicite deadline, utilisation check already passed
-            if self.task_set.is_implicite_deadline:
+            if self.task_set.is_synchronous and self.task_set.deadline_type == "implicite":
                 return True
             # else, must do simulation
 
@@ -150,9 +183,8 @@ class Preprocessor:
         """
         Preprocess the taskset to seek shortcuts
         """
-        if not self.check_taskset_properties():
-            raise ValueError("Taskset is not with constrained deadline, check input taskset")
-
+        self.check_taskset_properties()
+        
         shortcut_is_feasible = self.feasibility_check()
 
         if self.do_simulation:

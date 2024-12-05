@@ -56,7 +56,7 @@ if __name__ == "__main__":
         ordering = args.s
     
 
-    task_set = datatypes.TaskSet(tasks=[], feasibility_interval=1)
+    task_set = datatypes.TaskSet(tasks=[])
     period_set = set()
     try:
         with open(taskset_file, 'r') as file:
@@ -96,11 +96,29 @@ if __name__ == "__main__":
         case "wf":
             partitioner_method = "worst_fit"
     
-    partitioner.partition(partitioner_method)
+    partition_is_feasible = partitioner.partition(partitioner_method)
+    print(f"Partitioner passed? : {partition_is_feasible}")
     
-    for processor in cores:
-        print(processor)
-        print(processor.task_set)
+    if partition_is_feasible:
+        for processor in cores:
+            print(processor)
+            print(processor.task_set)
+            preprocessor = Preprocessor(processor.task_set, "edf")
+            prep_is_feasible = preprocessor.preprocess()
+            print(f"Feasibility check preprocess passed? : {prep_is_feasible}")
+            if prep_is_feasible:
+                print(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
+                if preprocessor.do_simulation:
+                    print(f"Simulation is needed, feasibility interval = {processor.task_set.feasibility_interval}")
+                    schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
+                    print(f"Simulation passed? : {schedulePassed}")
+            
+    else:
+        for processor in cores:
+            print(processor)
+            print(processor.task_set)
+
+        
 
     """
     preprocessor = Preprocessor(task_set, scheduling_algorithm)
