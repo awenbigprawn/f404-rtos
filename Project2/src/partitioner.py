@@ -1,5 +1,5 @@
 from datatypes import *
-import math
+import help_functions
 
 class Processor:
     def __init__(self, processor_id: int) -> None:
@@ -18,55 +18,53 @@ class Partitioner:
         self.task_set = task_set
         self.processors = processors
         self.ordering = ordering
-        self.epsilon = 1e-15
-
-    def is_greater_or_equal(self, a, b):
-        return a > b or math.isclose(a, b, abs_tol=self.epsilon)
-    
-    def is_smaller_or_equal(self, a, b):
-        return a < b or math.isclose(a, b, abs_tol=self.epsilon)
-
-    def is_equal(self, a, b):
-        return a == b or math.isclose(a, b, abs_tol=self.epsilon)
 
     def partition(self, partition_method: str):
         # check task_set.tasks list is not empty
         if len(self.task_set.tasks) == 0:
             print("partioner: Task set is empty")
-            return
+            return True
         # check processors list is not empty
         if len(self.processors) == 0:
             print("partioner: Processors list is empty")
-            return
+            return False
         
         # partition the task set into processors
         # sort task set by utilization
         if self.ordering == "iu":
             # increase utilization order
             self.task_set.tasks.sort(key=lambda x: x.utilization)
+            print(self.task_set)
         elif self.ordering == "du":
             # decrease utilization order
             self.task_set.tasks.sort(key=lambda x: x.utilization, reverse=True)
+            print(self.task_set)
         
+        is_partion_success = False
         # assign tasks to processors
         if partition_method == "first_fit":
-            self.first_fit()
+            is_partion_success = self.first_fit()
         elif partition_method == "next_fit":
-            self.next_fit()
+            is_partion_success = self.next_fit()
         elif partition_method == "best_fit":
-            self.best_fit()
+            is_partion_success = self.best_fit()
         elif partition_method == "worst_fit":
-            self.worst_fit()
-
+            is_partion_success = self.worst_fit()
+        else:
+            print("partioner: No such partition method")
+            is_partion_success = False
+    
+        return is_partion_success
 
     # First Fit, Next Fit, Best Fit and Worst Fit
     def first_fit(self):
         # scan the processors list, find the first free processor and assign the task to it
         for task in self.task_set.tasks:
+            print(task)
             find_processor_flag = False
             for processor in self.processors:
-                print(f"c-l = {float(processor.capacity - processor.load)}, u = {task.utilization}")
-                if self.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
+                print(f"processor {processor.processor_id}: c-l = {float(processor.capacity - processor.load):.3f}, u = {task.utilization:.3f}")
+                if help_functions.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
                     processor.task_set.tasks.append(task)
                     processor.load += task.utilization
                     find_processor_flag = True
@@ -75,6 +73,7 @@ class Partitioner:
                 print(f"first_fit: No free processor found for task {task.task_id}")
                 #TODO: not schedulable for first fit
                 return False
+        print("first_fit: partitioned successfully")
         return True
             
     def next_fit(self):
@@ -84,7 +83,7 @@ class Partitioner:
         for processor in self.processors:
             while taskset_list:
                 task = taskset_list[0]
-                if self.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
+                if help_functions.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
                     processor.task_set.tasks.append(task)
                     processor.load += task.utilization
                     taskset_list.pop(0)
@@ -96,6 +95,7 @@ class Partitioner:
             # not schedulable for next fit
             return False
         else:
+            print("next_fit: partitioned successfully")
             return True
 
     def best_fit(self):
@@ -106,16 +106,16 @@ class Partitioner:
             task_first_fit_flag = True
             # find the best processor
             for processor in self.processors:
-                if self.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
+                if help_functions.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
                     if task_first_fit_flag:
                         best_processor = processor
                         task_first_fit_flag = False
                         max_load = processor.load
                         continue
-                    if self.is_equal(processor.load, max_load):
+                    if help_functions.is_equal(processor.load, max_load):
                         # not improving
                         continue
-                    if self.is_greater_or_equal(processor.load, max_load):
+                    if help_functions.is_greater_or_equal(processor.load, max_load):
                         # is actually improving, if equal, it should be continued in the if before
                         best_processor = processor
                         max_load = processor.load
@@ -127,6 +127,7 @@ class Partitioner:
             else:
                 best_processor.task_set.tasks.append(task)
                 best_processor.load += task.utilization
+        print("best_fit: partitioned successfully")
         return True
 
     def worst_fit(self):
@@ -137,16 +138,16 @@ class Partitioner:
             task_first_fit_flag = True
             # find the worst processor
             for processor in self.processors:
-                if self.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
+                if help_functions.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
                     if task_first_fit_flag:
                         worst_processor = processor
                         task_first_fit_flag = False
                         min_load = processor.load
                         continue
-                    if self.is_equal(processor.load, min_load):
+                    if help_functions.is_equal(processor.load, min_load):
                         # not improving
                         continue
-                    if self.is_smaller_or_equal(processor.load, min_load):
+                    if help_functions.is_smaller_or_equal(processor.load, min_load):
                         # is actually improving, if equal, it should be continued in the if before
                         worst_processor = processor
                         min_load = processor.load
@@ -157,6 +158,7 @@ class Partitioner:
             else:
                 worst_processor.task_set.tasks.append(task)
                 worst_processor.load += task.utilization
+        print("worst_fit: partitioned successfully")
         return True
 
 

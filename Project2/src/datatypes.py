@@ -68,18 +68,18 @@ class Job:
 @dataclass
 class TaskSet:
     tasks: List[Task]
-    feasibility_interval: int = 0
+    feasibility_interval: int = 1
     simulator_timestep: int = 1
     is_synchronous: bool = False
-    is_implicite_deadline: bool = False
-
+    deadline_type = "arbitrary" # arbitrary, constrained, implicite
 
     def __str__(self):
         # make a table to list all tasks
         table = "TaskSet:\n"
-        table += "ID\tName\tC\tT\tD\tO\n"
+        table += "ID\tName\tC\tT\tD\tO\tU\n"
         for task in self.tasks:
-            table += str(task.task_id) + "\t" + task.name + "\t" + str(task.computation_time) + "\t" + str(task.period) + "\t" + str(task.deadline) + "\t" + str(task.offset) + "\n"
+            table += f"{task.task_id}\t{task.name}\t{task.computation_time}\t{task.period}\t{task.deadline}\t{task.offset}\t{task.utilization:.3f}\n"
+
         return table
 
     def release_jobs(self, t: int) -> List[Job]:

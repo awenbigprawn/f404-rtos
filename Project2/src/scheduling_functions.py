@@ -56,11 +56,11 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
     jobs:List[Job] = []
     current_time = 0
     while current_time < time_max:
-        if jobs == [] and current_time > 0:
-            # an idle points!
+        if TaskSet.is_synchronous and jobs == [] and current_time > 0:
+            # if taskset is synchronous and find an idle points!
             if scheduling_function == early_deadline_first:
-                # Theorem 58, Idle point in EDF
-                print(f"EDF: Idle point at time {current_time}")
+                # Idle point in EDF, (Corollary 59)
+                print(f"EDF: synchronous taskset with Idle point at time {current_time}")
                 return True
         # jobs = old jobs + new jobs
         jobs.extend(task_set.release_jobs(current_time))
