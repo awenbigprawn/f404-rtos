@@ -119,6 +119,10 @@ class Preprocessor:
             if help_functions.is_greater(sum_utilisation, 1):
                 # if sum of utilisation > 1, not feasible, return False
                 return False
+        # if there is only one/no task in taskset
+        if len(self.task_set.tasks) <= 1:
+            print("taskset has only one/no task, utiliasion check pass")
+            return True
         # if taskset is implicite deadline
         if self.task_set.deadline_type == "implicite":
             # DM become RM, utilisation check possible:
@@ -167,6 +171,7 @@ class Preprocessor:
         if self.scheduling_algorithm == "edf":
             # edf is ideal for implicite deadline, utilisation check already passed
             if self.task_set.is_synchronous and self.task_set.deadline_type == "implicite":
+                print(f"taskset is synchronous and implicite deadline, no need for simulation")
                 return True
             # else, must do simulation
 

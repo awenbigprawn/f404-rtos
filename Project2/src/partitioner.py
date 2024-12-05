@@ -63,7 +63,7 @@ class Partitioner:
             print(task)
             find_processor_flag = False
             for processor in self.processors:
-                print(f"processor {processor.processor_id}: c-l = {float(processor.capacity - processor.load):.3f}, u = {task.utilization:.3f}")
+                # print(f"processor {processor.processor_id}: c-l = {float(processor.capacity - processor.load):.3f}, u = {task.utilization:.3f}")
                 if help_functions.is_greater_or_equal(processor.capacity - processor.load, task.utilization):
                     processor.task_set.tasks.append(task)
                     processor.load += task.utilization
