@@ -83,10 +83,10 @@ if __name__ == "__main__":
     for i in range(num_cores):
         processor_list.append(Processor(i))
     
-    cores = [Processor(i) for i in range(num_cores)]
+    #cores = [Processor(i) for i in range(num_cores)]
 
     if scheduling_algorithm == "partitioned":
-        partitioner = Partitioner(task_set, cores, ordering)
+        partitioner = Partitioner(task_set, processor_list, ordering)
         
         partitioner_method = None
         match heuristic:
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
         
         if partition_is_possible:
-            for processor in cores:
+            for processor in processor_list:
                 print(processor)
                 print(processor.task_set)
                 preprocessor = Preprocessor(processor.task_set, "edf")
@@ -138,6 +138,7 @@ if __name__ == "__main__":
                     schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
                     print(f"Simulation passed? : {schedulePassed}")
     
+
     elif scheduling_algorithm == "global":
         # for now single threaded implementation
         schedulable = True
