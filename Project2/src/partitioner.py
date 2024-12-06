@@ -1,4 +1,5 @@
 from datatypes import *
+import scheduling_functions
 import help_functions
 
 class Processor:
@@ -8,10 +9,15 @@ class Processor:
         self.jobs = []
         self.capacity = 1
         self.load = 0.0
+        # a log of string for simulation
+        self.log = []
 
     def __str__(self):
         # show id, capacity, load. load only show 2 decimal places
         return f"Processor{self.processor_id}: Capacity: {self.capacity}, Load: {self.load:.2f}"
+    
+    def schedule(self, scheduling_function, time_max: int, time_step: int) -> bool:
+        return scheduling_functions.schedule(self.task_set, scheduling_function, time_max, time_step, processor=self)
 
 class Partitioner:
     def __init__(self, task_set: TaskSet, processors: List[Processor], ordering) -> None:

@@ -102,41 +102,34 @@ if __name__ == "__main__":
         partition_is_possible = partitioner.partition(partitioner_method)
         print(f"Partitioner passed? : {partition_is_possible}\n")
         
-        # processor_list_need_simu = partitioner.processors
-        # for processor in cores:
-        #     print(processor)
-        #     print(processor.task_set)
-        #     preprocessor = Preprocessor(processor.task_set, "edf")
-        #     prep_is_feasible = preprocessor.preprocess()
-        #     if prep_is_feasible and preprocessor.do_simulation:
-                
-
-
-        # def run_processor(processor):
-        #     if prep_is_feasible:
-        #         schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=task_set.feasibility_interval, time_step=task_set.simulator_timestep)
-        #     else:
-        #         schedulePassed = False
-        #     return f"Processor {processor.processor_id} passed? : {schedulePassed}"
-
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        #     results = executor.map(run_processor, cores)
-        #     for result in results:
-        #         print(result)
-    
-
-        
         if partition_is_possible:
+<<<<<<< HEAD
             for processor in processor_list:
                 print(processor)
                 print(processor.task_set)
+=======
+            def process_processor(processor:Processor):
+>>>>>>> 3160635 (partition works in parallel)
                 preprocessor = Preprocessor(processor.task_set, "edf")
                 prep_is_feasible = preprocessor.preprocess()
-                print(f"Feasibility check preprocess passed? : {prep_is_feasible}")
+                processor.log.append(f"Processor {processor} preprocess passed? : {prep_is_feasible}")
                 if not prep_is_feasible and preprocessor.do_simulation:
-                    print(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
-                    schedulePassed = schedule(task_set=processor.task_set, scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
-                    print(f"Simulation passed? : {schedulePassed}")
+                    processor.log.append(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
+                    schedulePassed = processor.schedule(scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
+                    processor.log.append(f"Simulation passed? : {schedulePassed}")
+                return schedulePassed if not prep_is_feasible and preprocessor.do_simulation else prep_is_feasible
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+                results = list(executor.map(process_processor, cores))
+
+            for processor in cores:
+                print(processor)
+                for msg in processor.log:
+                    print(msg)
+                print("")
+
+            overall_result = all(results)
+            print(f"Overall scheduling passed? : {overall_result}")
     
 
     elif scheduling_algorithm == "global":

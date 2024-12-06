@@ -8,7 +8,7 @@ class Preprocessor:
         self.scheduling_algorithm = scheduling_algorithm
         self.do_simulation = False
 
-    def check_taskset_properties(self):
+    def check_taskset_properties(self, is_print: bool = True):
         """
         check synchronous, constrained deadline, implicite deadline
         """
@@ -20,33 +20,33 @@ class Preprocessor:
             # check synchronous
             if temp_synchronous_checker and task.offset != 0:
                 temp_synchronous_checker = False
-                print(task.name + " has a non-zero offset, taskset is asynchronous")
+                if is_print: print(task.name + " has a non-zero offset, taskset is asynchronous")
             # check deadline type
             if temp_implicite_deadline_checker and task.deadline < task.period:
                 # a task has not implicite deadline, set the checker to False
                 temp_implicite_deadline_checker = False
-                print(task.name + " has a deadline smaller than its period, taskset has not implicite deadline")
+                if is_print: print(task.name + " has a deadline smaller than its period, taskset has not implicite deadline")
             if task.deadline > task.period:
-                print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
+                if is_print: print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
                 temp_constrained_deadline_checker = False
 
         # set the task_set properties
         if temp_synchronous_checker:
             self.task_set.is_synchronous = True
-            print("taskset is synchronous")
+            if is_print: print("taskset is synchronous")
         else:
             self.task_set.is_synchronous = False
-            print("taskset is asynchronous")
+            if is_print: print("taskset is asynchronous")
 
         if temp_implicite_deadline_checker and temp_constrained_deadline_checker:
             self.task_set.deadline_type = "implicite"
-            print("taskset has implicite deadline")
+            if is_print: print("taskset has implicite deadline")
         elif temp_constrained_deadline_checker:
             self.task_set.deadline_type = "constrained"
-            print("taskset has constrained deadline")
+            if is_print: print("taskset has constrained deadline")
         else:
             self.task_set.deadline_type = "arbitrary"
-            print("taskset has arbitrary deadline")
+            if is_print: print("taskset has arbitrary deadline")
 
     def set_feasibility_interval(self) -> None:
         """
@@ -105,7 +105,7 @@ class Preprocessor:
 
         self.task_set.simulator_timestep = find_gcd(temp_CTD_list)
 
-    def feasibility_check(self) -> bool:
+    def feasibility_check(self, is_print) -> bool:
         """
         Check if the taskset is feasible for the given scheduling algorithm, and if not sure, do simulation
         """
@@ -121,7 +121,7 @@ class Preprocessor:
                 return False
         # if there is only one/no task in taskset
         if len(self.task_set.tasks) <= 1:
-            print("taskset has only one/no task, utiliasion check pass")
+            if is_print: print("taskset has only one/no task, utiliasion check pass")
             return True
         # if taskset is implicite deadline
         if self.task_set.deadline_type == "implicite":
@@ -132,14 +132,14 @@ class Preprocessor:
                 if sum_utilisation <= n_task * (2**(1/n_task) - 1):
                     return True
             else:
-                print("taskset has no task")
+                if is_print: print("taskset has no task")
                 return True
 
         if self.scheduling_algorithm == "dm":
             # There is exact schedulability test for dm
             # sort tasks by deadline in task_set
             self.task_set.tasks = sorted(self.task_set.tasks, key=lambda task: task.deadline)
-            print(self.task_set)
+            if is_print: print(self.task_set)
             # for task in self.task_set.tasks:
             checked_tasks_list: List[Task] = []
             for task in self.task_set.tasks:
@@ -152,14 +152,14 @@ class Preprocessor:
                     wcrt = task.computation_time
                     for checked_task in checked_tasks_list:
                         wcrt += math.ceil(last_wcrt/checked_task.period) * checked_task.computation_time
-                    print(f"{task.name} update wcrt = {wcrt}")
+                    if is_print: print(f"{task.name} update wcrt = {wcrt}")
                     if wcrt > task.deadline:
                         # already miss deadline, not feasible, return False
-                        print(f"{task.name} missed deadline at with wcrt >= {wcrt} > {task.deadline}")
+                        if is_print: print(f"{task.name} missed deadline at with wcrt >= {wcrt} > {task.deadline}")
                         return False
                     
                     if wcrt == last_wcrt:
-                        print(f"{task.name} with wcrt = {wcrt} <= {task.deadline}, pass")
+                        if is_print: print(f"{task.name} with wcrt = {wcrt} <= {task.deadline}, pass")
                         break
 
                     last_wcrt = wcrt
@@ -171,7 +171,7 @@ class Preprocessor:
         if self.scheduling_algorithm == "edf":
             # edf is ideal for implicite deadline, utilisation check already passed
             if self.task_set.is_synchronous and self.task_set.deadline_type == "implicite":
-                print(f"taskset is synchronous and implicite deadline, no need for simulation")
+                if is_print: print(f"taskset is synchronous and implicite deadline, no need for simulation")
                 return True
             # else, must do simulation
 
@@ -184,13 +184,13 @@ class Preprocessor:
         return False
 
 
-    def preprocess(self) -> bool:
+    def preprocess(self, is_print: bool = False) -> bool:
         """
         Preprocess the taskset to seek shortcuts
         """
-        self.check_taskset_properties()
+        self.check_taskset_properties(is_print)
         
-        shortcut_is_feasible = self.feasibility_check()
+        shortcut_is_feasible = self.feasibility_check(is_print)
 
         if self.do_simulation:
             self.set_feasibility_interval()

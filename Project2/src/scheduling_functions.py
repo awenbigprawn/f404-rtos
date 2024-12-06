@@ -1,4 +1,5 @@
 from datatypes import *
+from partitioner import Processor
 from typing import List
 
 """def rate_monotonic(job_set: List[Job]) -> Job:
@@ -49,24 +50,33 @@ def early_deadline_first(job_set: List[Job]) -> Job:
     # return the moved Job, now it is on tail
     return job_set[-1]"""
 
-def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: int) -> bool:
+def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: int, processor: Processor = None) -> bool:
     """
     Schedule jobs from the task set using the given scheduling function and time step
+    Save logs to the processor's log attribute if provided, otherwise print
     """
-    jobs:List[Job] = []
+    jobs: List[Job] = []
     current_time = 0
     while current_time < time_max:
         if TaskSet.is_synchronous and jobs == [] and current_time > 0:
             # if taskset is synchronous and find an idle points!
             if scheduling_function == early_deadline_first:
                 # Idle point in EDF, (Corollary 59)
-                print(f"EDF: synchronous taskset with Idle point at time {current_time}")
+                log_message = f"EDF: synchronous taskset with Idle point at time {current_time}"
+                if processor:
+                    processor.log.append(log_message)
+                else:
+                    print(log_message)
                 return True
         # jobs = old jobs + new jobs
         jobs.extend(task_set.release_jobs(current_time))
         for job in jobs:
             if job.deadline_missed(current_time):
-                print("Deadline missed for job " + job.name + " at time " + str(current_time))
+                log_message = f"Deadline missed for job {job.name} at time {current_time}"
+                if processor:
+                    processor.log.append(log_message)
+                else:
+                    print(log_message)
                 return False
         # schedule the job with the highest priority
         job = scheduling_function(jobs)
@@ -76,4 +86,4 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
                 jobs.remove(job)
         # schedule the job
         current_time += time_step
-    return True    
+    return True
