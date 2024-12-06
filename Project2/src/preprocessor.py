@@ -207,7 +207,7 @@ def preprocess_global_edf(task_set, num_cores):
     need_simulation is True if we need to simulate to determine schedulability.
     """
     
-    total_utilization = sum(task.computation_time / task.period for task in task_set.tasks)
+    total_utilization = sum(task.utilization for task in task_set.tasks)
     print(f"Total utilization: {total_utilization}")
 
     
