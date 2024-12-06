@@ -79,11 +79,7 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print("File not found, please check the provided path")
 
-    processor_list = []
-    for i in range(num_cores):
-        processor_list.append(Processor(i))
-    
-    #cores = [Processor(i) for i in range(num_cores)]
+    processor_list = [Processor(i) for i in range(num_cores)]
 
     if scheduling_algorithm == "partitioned":
         partitioner = Partitioner(task_set, processor_list, ordering)
@@ -114,9 +110,9 @@ if __name__ == "__main__":
                 return schedulePassed if not prep_is_feasible and preprocessor.do_simulation else prep_is_feasible
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-                results = list(executor.map(process_processor, cores))
+                results = list(executor.map(process_processor, processor_list))
 
-            for processor in cores:
+            for processor in processor_list:
                 print(processor)
                 for msg in processor.log:
                     print(msg)
