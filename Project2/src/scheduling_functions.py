@@ -77,3 +77,42 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
         # schedule the job
         current_time += time_step
     return True    
+
+def schedule_global_edf(task_set: TaskSet, time_max: int, time_step: int, num_cores: int) -> bool:
+    """
+    Schedule jobs from the task set using the global EDF scheduling algorithm
+    """
+    # for now single threaded implementation
+    schedulable = True
+
+    jobs = []
+
+    current_time = 0
+
+    while current_time < time_max:
+        # Release new jobs at current time
+        new_jobs = task_set.release_jobs(current_time)
+        jobs.extend(new_jobs)
+
+        # Remove completed jobs
+        jobs = [job for job in jobs if job.computing_time > 0]
+
+        # Check for deadline misses
+        for job in jobs:
+            if job.deadline_missed(current_time):
+                print(f"Deadline missed for job {job.name} at time {current_time}")
+                schedulable = False
+
+        # Sort jobs by earliest deadline
+        jobs.sort(key=lambda job: job.deadline)
+
+        # Select up to m jobs to schedule on m cores
+        scheduled_jobs = jobs[:num_cores]
+
+        # Schedule selected jobs
+        for job in scheduled_jobs:
+            job.schedule(time_step)
+
+        current_time += time_step
+
+    return schedulable

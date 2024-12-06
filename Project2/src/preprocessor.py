@@ -197,3 +197,24 @@ class Preprocessor:
             self.set_simulator_timestep()
 
         return shortcut_is_feasible
+
+def preprocess_global_edf(task_set, num_cores):
+    """
+    Preprocess the taskset to determine if simulation is needed for asynchronous tasks on multiple cores.
+    Returns is_feasible and need_simulation.
+    is_feasible is True if the taskset is schedulable without simulation.
+    is_feasible is False if the taskset is not schedulable or cannot be determined without simulation.
+    need_simulation is True if we need to simulate to determine schedulability.
+    """
+    
+    total_utilization = sum(task.computation_time / task.period for task in task_set.tasks)
+    print(f"Total utilization: {total_utilization}")
+
+    
+    if total_utilization > num_cores:
+        print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
+        return False, False  # Not feasible, no need to simulate
+
+    
+    print("Cannot guarantee schedulability without simulation for asynchronous tasks.")
+    return False, True  # Feasibility unknown, need to simulate
