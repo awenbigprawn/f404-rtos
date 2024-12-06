@@ -123,45 +123,21 @@ if __name__ == "__main__":
     
 
     elif scheduling_algorithm == "global":
-        # for now single threaded implementation
-        schedulable = True
-        time_max = task_set.feasibility_interval
-        time_step = task_set.simulator_timestep
-        jobs = []
-        current_time = 0
-        while current_time < time_max:
-            # Release new jobs at current time
-            new_jobs = task_set.release_jobs(current_time)
-            jobs.extend(new_jobs)
-
-            # Remove completed jobs
-            jobs = [job for job in jobs if job.computing_time > 0]
-
-            # Check for deadline misses
-            for job in jobs:
-                if job.deadline_missed(current_time):
-                    print(f"Deadline missed for job {job.name} at time {current_time}")
-                    schedulable = False
-
-            # Sort jobs by earliest deadline
-            jobs.sort(key=lambda job: job.deadline)
-
-            # Select up to m jobs to schedule on m cores
-            scheduled_jobs = jobs[:num_cores]
-
-            # Schedule selected jobs
-            for job in scheduled_jobs:
-                job.schedule(time_step)
-
-            current_time += time_step
-
-        print(f"Global EDF scheduling passed? : {schedulable}")
+       
+        is_feasible, need_simulation = preprocess_global_edf(task_set, num_cores)
+        print(f"Feasibility check preprocess passed? : {is_feasible}")
+        if not is_feasible and need_simulation:
+            print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
+            schedulePassed = schedule_global_edf(task_set, task_set.feasibility_interval, task_set.simulator_timestep, num_cores)
+            print(f"Simulation passed? : {schedulePassed}")
+            
 
 
     else:
-        for processor in cores:
+        for processor in processor_list:
             print(processor)
             print(processor.task_set)
+
 
     """
     preprocessor = Preprocessor(task_set, scheduling_algorithm)
