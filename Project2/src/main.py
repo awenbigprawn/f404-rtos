@@ -103,13 +103,7 @@ if __name__ == "__main__":
         print(f"Partitioner passed? : {partition_is_possible}\n")
         
         if partition_is_possible:
-<<<<<<< HEAD
-            for processor in processor_list:
-                print(processor)
-                print(processor.task_set)
-=======
             def process_processor(processor:Processor):
->>>>>>> 3160635 (partition works in parallel)
                 preprocessor = Preprocessor(processor.task_set, "edf")
                 prep_is_feasible = preprocessor.preprocess()
                 processor.log.append(f"Processor {processor} preprocess passed? : {prep_is_feasible}")
