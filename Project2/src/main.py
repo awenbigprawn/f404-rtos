@@ -130,10 +130,10 @@ if __name__ == "__main__":
             print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
             schedulePassed = schedule_global_edf(task_set, task_set.feasibility_interval, task_set.simulator_timestep, num_cores)
             print(f"Simulation passed? : {schedulePassed}")
-            
-
 
     else:
+        print(f"edf(k), k = {scheduling_algorithm}")
+        k_of_edf = int(scheduling_algorithm)
         for processor in processor_list:
             print(processor)
             print(processor.task_set)

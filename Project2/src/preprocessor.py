@@ -105,7 +105,7 @@ class Preprocessor:
 
         self.task_set.simulator_timestep = find_gcd(temp_CTD_list)
 
-    def feasibility_check(self, is_print) -> bool:
+    def feasibility_check(self, is_print: bool) -> bool:
         """
         Check if the taskset is feasible for the given scheduling algorithm, and if not sure, do simulation
         """
@@ -198,7 +198,7 @@ class Preprocessor:
 
         return shortcut_is_feasible
 
-    def preprocess_global_edf(self, task_set, num_cores):
+    def preprocess_global_edf(self, task_set: TaskSet, num_cores: int):
         """
         Preprocess the taskset to determine if simulation is needed for asynchronous tasks on multiple cores.
         Returns is_feasible and need_simulation.
@@ -212,6 +212,36 @@ class Preprocessor:
         max_utilization = max(task.utilization for task in task_set.tasks)
         print(f"Total utilization: {total_utilization}")
 
+        
+        if help_functions.is_greater(total_utilization, num_cores):
+            print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
+            return False, False  # Not feasible, no need to simulate
+
+        # Theorem 84
+        if task_set.deadline_type == "implicite" and help_functions.is_smaller_or_equal(max_utilization, 1):
+            print("Max utilization is less than or equal to 1. Taskset is schedulable.")
+            return True, False  # Feasible, no need to simulate
+        
+        if task_set.is_synchronous and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
+            # Theorem 91
+            return True, False  # Feasible, no need to simulate
+        
+        print("Cannot guarantee schedulability without simulation for asynchronous tasks.")
+        return False, True  # Feasibility unknown, need to simulate
+    
+    def preprocess_global_edf_k(self, task_set: TaskSet, num_cores, k_value):
+        """
+        Preprocess the taskset to determine if simulation is needed for asynchronous tasks on multiple cores.
+        Returns is_feasible and need_simulation.
+        is_feasible is True if the taskset is schedulable without simulation.
+        is_feasible is False if the taskset is not schedulable or cannot be determined without simulation.
+        need_simulation is True if we need to simulate to determine schedulability.
+        """
+        self.check_taskset_properties(True)
+
+        total_utilization = sum(task.utilization for task in task_set.tasks)
+        max_utilization = max(task.utilization for task in task_set.tasks)
+        print(f"Total utilization: {total_utilization}")
         
         if help_functions.is_greater(total_utilization, num_cores):
             print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
