@@ -208,13 +208,18 @@ def preprocess_global_edf(task_set, num_cores):
     """
     
     total_utilization = sum(task.utilization for task in task_set.tasks)
+    max_utilization = max(task.utilization for task in task_set.tasks)
     print(f"Total utilization: {total_utilization}")
 
     
-    if total_utilization > num_cores:
+    if help_functions.is_greater(total_utilization, num_cores):
         print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
         return False, False  # Not feasible, no need to simulate
 
+    # Theorem 84
+    if help_functions.is_smaller_or_equal(max_utilization, 1):
+        print("Max utilization is less than or equal to 1. Taskset is schedulable.")
+        return True, False  # Feasible, no need to simulate
     
     print("Cannot guarantee schedulability without simulation for asynchronous tasks.")
     return False, True  # Feasibility unknown, need to simulate
