@@ -10,11 +10,11 @@ class Preprocessor:
 
     def check_taskset_properties(self, is_print: bool = True):
         """
-        check synchronous, constrained deadline, implicite deadline
+        check synchronous, constrained deadline, implicit deadline
         """
-        # init a checker for implicite deadline with True
+        # init a checker for implicit deadline with True
         temp_synchronous_checker = True
-        temp_implicite_deadline_checker = True
+        temp_implicit_deadline_checker = True
         temp_constrained_deadline_checker = True
         for task in self.task_set.tasks:
             # check synchronous
@@ -22,10 +22,10 @@ class Preprocessor:
                 temp_synchronous_checker = False
                 if is_print: print(task.name + " has a non-zero offset, taskset is asynchronous")
             # check deadline type
-            if temp_implicite_deadline_checker and task.deadline < task.period:
-                # a task has not implicite deadline, set the checker to False
-                temp_implicite_deadline_checker = False
-                if is_print: print(task.name + " has a deadline smaller than its period, taskset has not implicite deadline")
+            if temp_implicit_deadline_checker and task.deadline < task.period:
+                # a task has not implicit deadline, set the checker to False
+                temp_implicit_deadline_checker = False
+                if is_print: print(task.name + " has a deadline smaller than its period, taskset has not implicit deadline")
             if task.deadline > task.period:
                 if is_print: print(task.name + " has a deadline larger than its period, taskset has arbitrary deadline")
                 temp_constrained_deadline_checker = False
@@ -38,9 +38,9 @@ class Preprocessor:
             self.task_set.is_synchronous = False
             if is_print: print("taskset is asynchronous")
 
-        if temp_implicite_deadline_checker and temp_constrained_deadline_checker:
-            self.task_set.deadline_type = "implicite"
-            if is_print: print("taskset has implicite deadline")
+        if temp_implicit_deadline_checker and temp_constrained_deadline_checker:
+            self.task_set.deadline_type = "implicit"
+            if is_print: print("taskset has implicit deadline")
         elif temp_constrained_deadline_checker:
             self.task_set.deadline_type = "constrained"
             if is_print: print("taskset has constrained deadline")
@@ -67,7 +67,7 @@ class Preprocessor:
             self._set_asynchronous_feasibility_interval()
 
     def _set_synchronous_feasibility_interval(self) -> None:
-        if self.task_set.deadline_type == "implicite" or self.task_set.deadline_type == "constrained":
+        if self.task_set.deadline_type == "implicit" or self.task_set.deadline_type == "constrained":
             if self.scheduling_algorithm in ["rr", "edf"]:
                 self.task_set.feasibility_interval = self._calculate_hyper_period()
             else:
@@ -123,8 +123,8 @@ class Preprocessor:
         if len(self.task_set.tasks) <= 1:
             if is_print: print("taskset has only one/no task, utiliasion check pass")
             return True
-        # if taskset is implicite deadline
-        if self.task_set.deadline_type == "implicite":
+        # if taskset is implicit deadline
+        if self.task_set.deadline_type == "implicit":
             # DM become RM, utilisation check possible:
             # Theorem 33
             n_task = len(self.task_set.tasks)
@@ -169,9 +169,9 @@ class Preprocessor:
             return True
         
         if self.scheduling_algorithm == "edf":
-            # edf is ideal for implicite deadline, utilisation check already passed
-            if self.task_set.is_synchronous and self.task_set.deadline_type == "implicite":
-                if is_print: print(f"taskset is synchronous and implicite deadline, no need for simulation")
+            # edf is ideal for implicit deadline, utilisation check already passed
+            if self.task_set.is_synchronous and self.task_set.deadline_type == "implicit":
+                if is_print: print(f"taskset is synchronous and implicit deadline, no need for simulation")
                 return True
             # else, must do simulation
 
@@ -206,27 +206,27 @@ class Preprocessor:
         is_feasible is False if the taskset is not schedulable or cannot be determined without simulation.
         need_simulation is True if we need to simulate to determine schedulability.
         """
+        self.set_feasibility_interval()
         self.check_taskset_properties(True)
 
         total_utilization = sum(task.utilization for task in task_set.tasks)
         max_utilization = max(task.utilization for task in task_set.tasks)
         print(f"Total utilization: {total_utilization}")
-
         
         if help_functions.is_greater(total_utilization, num_cores):
             print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
             return False, False  # Not feasible, no need to simulate
 
         # Theorem 84
-        if task_set.deadline_type == "implicite" and help_functions.is_smaller_or_equal(max_utilization, 1):
-            print("Max utilization is less than or equal to 1. Taskset is schedulable.")
+        if task_set.deadline_type == "implicit" and help_functions.is_smaller_or_equal(max_utilization, 1):
+            print("implicit ddl sys with max utilization is less than or equal to 1. Taskset is schedulable.")
             return True, False  # Feasible, no need to simulate
         
-        if task_set.deadline_type == "implicite" and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
+        if task_set.deadline_type == "implicit" and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
             # Theorem 91
+            print("Theorem 91")
             return True, False  # Feasible, no need to simulate
         
-        print("Cannot guarantee schedulability without simulation for asynchronous tasks.")
         return False, True  # Feasibility unknown, need to simulate
     
     def preprocess_global_edf_k(self, task_set: TaskSet, num_cores, k_value):
@@ -237,7 +237,18 @@ class Preprocessor:
         is_feasible is False if the taskset is not schedulable or cannot be determined without simulation.
         need_simulation is True if we need to simulate to determine schedulability.
         """
+        self.set_feasibility_interval()
         self.check_taskset_properties(True)
+        # sort the tasks by utilisation from large to small
+        task_set.tasks = sorted(task_set.tasks, key=lambda task: task.utilization, reverse=True)
+        print(task_set)
+
+        # the k-th largest utilisation
+        k_th_utilisation = task_set.tasks[k_value-1].utilization
+        # k_plus1_sum_utilisation is the sum of the k+1 th largest utilisation to the end
+        k_plus1_sum_utilisation = sum(task.utilization for task in task_set.tasks[k_value:])
+        print(f"k-th utilisation: {k_th_utilisation}")
+        print(f"k+1 sum utilisation: {k_plus1_sum_utilisation}")
 
         total_utilization = sum(task.utilization for task in task_set.tasks)
         max_utilization = max(task.utilization for task in task_set.tasks)
@@ -247,14 +258,8 @@ class Preprocessor:
             print("Total utilization exceeds the number of cores. Taskset is not schedulable.")
             return False, False  # Not feasible, no need to simulate
 
-        # Theorem 84
-        if help_functions.is_smaller_or_equal(max_utilization, 1):
-            print("Max utilization is less than or equal to 1. Taskset is schedulable.")
+        # Theorem 93
+        if task_set.deadline_type == "implicit" and help_functions.is_greater_or_equal(num_cores, (k_value-1)+math.ceil(k_plus1_sum_utilisation/(1-k_th_utilisation))):
             return True, False  # Feasible, no need to simulate
         
-        if task_set.is_synchronous and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
-            # Theorem 91
-            return True, False  # Feasible, no need to simulate
-        
-        print("Cannot guarantee schedulability without simulation for asynchronous tasks.")
         return False, True  # Feasibility unknown, need to simulate

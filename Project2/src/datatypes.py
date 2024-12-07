@@ -32,7 +32,7 @@ class Task:
                        release_time=t,
                        computing_time=self.computation_time,
                        deadline=t + self.deadline,
-                    #    priority=self.priority,
+                       priority=0,
                        task=self)  # pass the task itself here
         else:
             return None
@@ -46,7 +46,7 @@ class Job:
     release_time: int
     computing_time: int
     deadline: int
-    # priority: int
+    priority: int
     task: Task
 
     def deadline_missed(self, t: int) -> bool:
