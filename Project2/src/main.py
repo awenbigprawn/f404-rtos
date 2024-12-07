@@ -123,8 +123,8 @@ if __name__ == "__main__":
     
 
     elif scheduling_algorithm == "global":
-       
-        is_feasible, need_simulation = preprocess_global_edf(task_set, num_cores)
+        preprocessor = Preprocessor(task_set, "edf")
+        is_feasible, need_simulation = preprocessor.preprocess_global_edf(task_set, num_cores)
         print(f"Feasibility check preprocess passed? : {is_feasible}")
         if not is_feasible and need_simulation:
             print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
