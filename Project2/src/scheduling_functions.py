@@ -2,7 +2,8 @@ from datatypes import *
 from partitioner import Processor
 from typing import List
 
-"""def rate_monotonic(job_set: List[Job]) -> Job:
+"""
+def rate_monotonic(job_set: List[Job]) -> Job:
     
     # Returns the job with the shortest period
     
@@ -27,7 +28,8 @@ def deadline_monotonic(job_set: List[Job]) -> Job:
         if highest_priority_job is None or job.task.deadline < highest_priority_job.task.deadline: 
             # deadline here must be tasks ddl, not the absolute ddl of each job
             highest_priority_job = job
-    return highest_priority_job"""
+    return highest_priority_job
+"""
 
 def early_deadline_first(job_set: List[Job]) -> Job:
     """
@@ -41,14 +43,16 @@ def early_deadline_first(job_set: List[Job]) -> Job:
     return highest_priority_job
 
 
-"""def round_robin(job_set: List[Job]) -> Job:
+"""
+def round_robin(job_set: List[Job]) -> Job:
     
     # Returns the first job in List, and move it to the last position
     
     # move the first Job in the List to the last position
     job_set.append(job_set.pop(0))
     # return the moved Job, now it is on tail
-    return job_set[-1]"""
+    return job_set[-1]
+"""
 
 def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: int, processor: Processor = None) -> bool:
     """
