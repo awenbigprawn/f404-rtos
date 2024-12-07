@@ -222,7 +222,7 @@ class Preprocessor:
             print("Max utilization is less than or equal to 1. Taskset is schedulable.")
             return True, False  # Feasible, no need to simulate
         
-        if task_set.is_synchronous and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
+        if task_set.deadline_type == "implicite" and help_functions.is_smaller_or_equal(total_utilization, num_cores - (num_cores - 1)*max_utilization):
             # Theorem 91
             return True, False  # Feasible, no need to simulate
         
