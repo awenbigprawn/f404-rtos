@@ -107,20 +107,25 @@ if __name__ == "__main__":
                     processor.log.append(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
                     schedulePassed = processor.schedule(scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
                     processor.log.append(f"Simulation passed? : {schedulePassed}")
-                return schedulePassed if not prep_is_feasible and preprocessor.do_simulation else prep_is_feasible
+                    return schedulePassed, preprocessor.do_simulation
+                return prep_is_feasible, False
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
                 results = list(executor.map(process_processor, processor_list))
-
+                results, results_need_simulation = zip(*results)
+            
             for processor in processor_list:
                 print(processor)
+                print(processor.task_set)
                 for msg in processor.log:
                     print(msg)
                 print("")
 
-            overall_result = all(results)
-            print(f"Overall scheduling passed? : {overall_result}")
-    
+            is_feasible = all(results)
+            need_simulation = any(results_need_simulation)
+            
+            print(f"Overall scheduling passed? : {is_feasible}")
+            print(f"Need simulation? : {need_simulation}")
 
     elif scheduling_algorithm == "global":
         preprocessor = Preprocessor(task_set, "edf")
@@ -141,26 +146,20 @@ if __name__ == "__main__":
             schedulePassed = schedule_global_edf_k(task_set, task_set.feasibility_interval, task_set.simulator_timestep, k_of_edf, num_cores)
             print(f"Simulation passed? : {schedulePassed}")
 
-    """
-    preprocessor = Preprocessor(task_set, scheduling_algorithm)
-    is_feasible = preprocessor.preprocess()
 
-    if preprocessor.do_simulation:
-        print(f"Simulation is needed, feasibility interval = {task_set.feasibility_interval}")
-        schedulePassed = schedule(task_set=task_set, scheduling_function=scheduling_function, time_max=task_set.feasibility_interval, time_step=task_set.simulator_timestep)
-        print(f"Simulation passed? : {schedulePassed}")
-        if(schedulePassed):
-            print("exit 0")
-            exit(0)
-        else:
-            print("exit 2")
-            exit(2)
+    if is_feasible and need_simulation:
+        print("exit 0")
+        exit(0)
+    elif is_feasible and not need_simulation:
+        print("exit 1")
+        exit(1)
+    elif not is_feasible and need_simulation:
+        print("exit 2")
+        exit(2)
+    elif not is_feasible and not need_simulation:
+        print("exit 3")
+        exit(3)
     else:
-        print("Simulation is not needed")
-        print(f"Feasibility check passed? : {is_feasible}")
-        if(is_feasible):
-            print("exit 1")
-            exit(1)
-        else:
-            print("exit 3")
-            exit(3)"""
+        print("exit 4")
+        exit(4)
+    
