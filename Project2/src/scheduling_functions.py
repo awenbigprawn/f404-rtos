@@ -105,9 +105,6 @@ def schedule_global_edf(task_set: TaskSet, time_max: int, time_step: int, num_co
         new_jobs = task_set.release_jobs(current_time)
         jobs.extend(new_jobs)
 
-        # Remove completed jobs
-        jobs = [job for job in jobs if job.computing_time > 0]
-
         # Check for deadline misses
         for job in jobs:
             if job.deadline_missed(current_time):
@@ -120,6 +117,9 @@ def schedule_global_edf(task_set: TaskSet, time_max: int, time_step: int, num_co
         # Schedule selected jobs
         for job in jobs[:num_cores]:
             job.schedule(time_step)
+
+        # Remove completed jobs
+        jobs = [job for job in jobs if job.computing_time > 0]
 
         current_time += time_step
 
@@ -137,10 +137,6 @@ def schedule_global_edf_k(task_set: TaskSet, time_max: int, time_step: int, k_va
     task_set_out_k = TaskSet(task_set.tasks[k_value:])
 
     while current_time < time_max:
-        
-        # Remove completed jobs
-        jobs = [job for job in jobs if job.computing_time > 0]
-
         # handle the first k taskset
         new_jobs_in_k = taskset_in_k.release_jobs(current_time)
         for job in new_jobs_in_k:
@@ -166,6 +162,9 @@ def schedule_global_edf_k(task_set: TaskSet, time_max: int, time_step: int, k_va
         # Schedule selected jobs
         for job in jobs[:num_cores]:
             job.schedule(time_step)
+        
+        # Remove completed jobs
+        jobs = [job for job in jobs if job.computing_time > 0]
 
         current_time += time_step
 
