@@ -21,7 +21,7 @@ def main():
         avg_time = 0
         for taskset in tasksets:
             exec_time = time_execution(taskset, i)
-            #print(f"Execution time for {taskset}: {exec_time:.4f} seconds")
+            print(f"Execution time for {taskset} with {i} workers: {exec_time:.4f} seconds")
             avg_time += exec_time
         avg_time /= len(tasksets)
     avg_times.append(avg_time)
