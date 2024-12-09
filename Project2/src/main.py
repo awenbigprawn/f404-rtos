@@ -81,6 +81,9 @@ if __name__ == "__main__":
 
     processor_list = [Processor(i) for i in range(num_cores)]
 
+    is_feasible = None
+    need_simulation = None
+
     if scheduling_algorithm == "partitioned":
         partitioner = Partitioner(task_set, processor_list, ordering)
         
@@ -146,20 +149,22 @@ if __name__ == "__main__":
             schedulePassed = schedule_global_edf_k(task_set, task_set.feasibility_interval, task_set.simulator_timestep, k_of_edf, num_cores)
             print(f"Simulation passed? : {schedulePassed}")
 
-
-    if is_feasible and need_simulation:
-        print("exit 0")
-        exit(0)
-    elif is_feasible and not need_simulation:
-        print("exit 1")
-        exit(1)
-    elif not is_feasible and need_simulation:
-        print("exit 2")
-        exit(2)
-    elif not is_feasible and not need_simulation:
-        print("exit 3")
-        exit(3)
-    else:
-        print("exit 4")
-        exit(4)
+    #if is_feasible is None or need_simulation is None:
+     #   raise ValueError(f"is_feasible and need_simulation must be set to True or False. Currently: is_feasible = {is_feasible}, need_simulation = {need_simulation}")
+    
+    #if is_feasible and need_simulation:
+    #    print("exit 0")
+    #    exit(0)
+    #elif is_feasible and not need_simulation:
+    #    print("exit 1")
+    #    exit(1)
+    #elif not is_feasible and need_simulation:
+    #    print("exit 2")
+    #    exit(2)
+    #elif not is_feasible and not need_simulation:
+    #    print("exit 3")
+    #    exit(3)
+    #else:
+    #    print("exit 4")
+    #    exit(4)
     
