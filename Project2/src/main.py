@@ -81,6 +81,9 @@ if __name__ == "__main__":
 
     processor_list = [Processor(i) for i in range(num_cores)]
 
+    is_feasible = None
+    need_simulation = None
+
     if scheduling_algorithm == "partitioned":
         partitioner = Partitioner(task_set, processor_list, ordering)
         
@@ -102,7 +105,7 @@ if __name__ == "__main__":
             def process_processor(processor:Processor):
                 preprocessor = Preprocessor(processor.task_set, "edf")
                 prep_is_feasible = preprocessor.preprocess()
-                processor.log.append(f"Processor {processor} preprocess passed? : {prep_is_feasible}")
+                processor.log.append(f"{processor} preprocess passed? : {prep_is_feasible}")
                 if not prep_is_feasible and preprocessor.do_simulation:
                     processor.log.append(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
                     schedulePassed = processor.schedule(scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
@@ -123,9 +126,16 @@ if __name__ == "__main__":
 
             is_feasible = all(results)
             need_simulation = any(results_need_simulation)
+            print("results:")
+            print(results)
+            print("results_need_simulation:")
+            print(results_need_simulation)
             
             print(f"Overall scheduling passed? : {is_feasible}")
             print(f"Need simulation? : {need_simulation}")
+        else:
+            is_feasible = False
+            need_simulation = False
 
     elif scheduling_algorithm == "global":
         preprocessor = Preprocessor(task_set, "edf")
@@ -146,20 +156,22 @@ if __name__ == "__main__":
             schedulePassed = schedule_global_edf_k(task_set, task_set.feasibility_interval, task_set.simulator_timestep, k_of_edf, num_cores)
             print(f"Simulation passed? : {schedulePassed}")
 
-
+    if is_feasible is None or need_simulation is None:
+       raise ValueError(f"is_feasible and need_simulation must be set to True or False. Currently: is_feasible = {is_feasible}, need_simulation = {need_simulation}")
+    
     if is_feasible and need_simulation:
-        print("exit 0")
-        exit(0)
+       print("exit 0")
+       exit(0)
     elif is_feasible and not need_simulation:
-        print("exit 1")
-        exit(1)
+       print("exit 1")
+       exit(1)
     elif not is_feasible and need_simulation:
-        print("exit 2")
-        exit(2)
+       print("exit 2")
+       exit(2)
     elif not is_feasible and not need_simulation:
-        print("exit 3")
-        exit(3)
+       print("exit 3")
+       exit(3)
     else:
-        print("exit 4")
-        exit(4)
+       print("exit 4")
+       exit(4)
     
