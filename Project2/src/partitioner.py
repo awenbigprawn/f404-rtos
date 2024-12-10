@@ -2,6 +2,7 @@ from datatypes import *
 import scheduling_functions
 import simulation_functions
 import help_functions
+import threading
 
 class Processor:
     def __init__(self, processor_id: int) -> None:
@@ -18,7 +19,7 @@ class Processor:
         # show id, capacity, load. load only show 2 decimal places
         return f"Processor{self.processor_id}: Capacity: {self.capacity}, Load: {self.load:.2f}"
     
-    def schedule(self, scheduling_function, time_max: int, time_step: int) -> bool:
+    def schedule(self, scheduling_function, time_max: int, time_step: int) -> NewBool:
         return simulation_functions.schedule(self.task_set, scheduling_function, time_max, time_step, processor=self)
 
 class Partitioner:

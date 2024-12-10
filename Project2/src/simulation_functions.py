@@ -2,12 +2,11 @@ from datatypes import *
 from scheduling_functions import *
 from partitioner import Processor
 from typing import List
-import threading
+import myglobal
 
-# Example shared flag to control interruption
-infeasible_detected = threading.Event()
 
-def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: int, processor: Processor = None) -> bool:
+def schedule(task_set: TaskSet, scheduling_function, 
+             time_max: int, time_step: int, processor: Processor = None) -> NewBool:
     """
     Schedule jobs from the task set using the given scheduling function and time step
     Save logs to the processor's log attribute if provided, otherwise print
@@ -18,6 +17,14 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
     synchronous_flag = task_set.is_synchronous
     if processor: processor.log.append(f"task_set.is_synchronous:{synchronous_flag}, edf_flag:{edf_flag}")
     while current_time < time_max:
+        if myglobal.global_stop_flag.is_set():
+            log_message = f"other processor failed, stop simulation at time {current_time}"
+            if processor:
+                processor.log.append(log_message)
+            else:
+                print(log_message)
+            return NewBool.CANNOT_TELL
+
         if  synchronous_flag and jobs == [] and current_time > 0:
             # if taskset is synchronous and find an idle points!
             if edf_flag:
@@ -27,7 +34,7 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
                     processor.log.append(log_message)
                 else:
                     print(log_message)
-                return True
+                return NewBool.TRUE
         # jobs = old jobs + new jobs
         jobs.extend(task_set.release_jobs(current_time))
         for job in jobs:
@@ -37,7 +44,7 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
                     processor.log.append(log_message)
                 else:
                     print(log_message)
-                return False
+                return NewBool.FALSE
         # schedule the job with the highest priority
         job = scheduling_function(jobs)
         if job is not None:
@@ -46,7 +53,7 @@ def schedule(task_set: TaskSet, scheduling_function, time_max: int, time_step: i
                 jobs.remove(job)
         # move to next step
         current_time += time_step
-    return True    
+    return NewBool.TRUE    
 
 def schedule_global_edf(task_set: TaskSet, time_max: int, time_step: int, num_cores: int) -> bool:
     """
