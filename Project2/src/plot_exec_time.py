@@ -47,7 +47,7 @@ def main():
     plt.xlabel('Number of workers')
     plt.ylabel('Average execution time (seconds)')
     plt.title('Average execution time vs number of workers')
-    plt.savefig('./docu/average_execution_time.png')
+    plt.savefig('./docu/average_execution_time_second_version.png')
     plt.show()
 
     
