@@ -1,6 +1,7 @@
 # Purpose: Defines the data types Tasks, Job and TaskSet
 from typing import List
 from dataclasses import dataclass, field
+from enum import Enum
 
 @dataclass
 class Task:
@@ -92,3 +93,36 @@ class TaskSet:
             if job is not None:
                 jobs.append(job)
         return jobs
+    
+    def synchronize_self(self)->'TaskSet':
+        """
+        return a copy of the taskset with all tasks synchronized, offset set to 0
+        """
+        # make a copy of the taskset
+        return TaskSet([Task(task_id=task.task_id,
+                        name=task.name,
+                        computation_time=task.computation_time,
+                        period=task.period,
+                        deadline=task.deadline,
+                        offset=0) for task in self.tasks])
+
+class NewBool(Enum):
+    TRUE = 1
+    FALSE = 0
+    CANNOT_TELL = -1
+
+    def __bool__(self):
+        if self == NewBool.CANNOT_TELL:
+            raise ValueError("Cannot convert CANNOT_TELL to bool")
+        return self.value == 1
+
+    def __str__(self):
+        return self.name.lower()
+    
+    def from_bool(b: bool):
+        if b:
+            return NewBool.TRUE
+        elif not b:
+            return NewBool.FALSE
+        else:
+            return None

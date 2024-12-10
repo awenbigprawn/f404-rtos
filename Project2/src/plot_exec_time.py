@@ -8,7 +8,7 @@ def get_tasksets(directory):
 
 def time_execution(taskset, worker_count):
     start_time = time.time()
-    subprocess.run(['python', './src/main.py', taskset, '8', '-v', 'partitioned', '-h', 'bf', '-s', 'du', '-w', str(worker_count)], stdout=subprocess.DEVNULL)
+    subprocess.run(['python3', './src/main2.py', taskset, '8', '-v', 'partitioned', '-h', 'bf', '-s', 'du', '-w', str(worker_count)], stdout=subprocess.DEVNULL)
     end_time = time.time()
     return end_time - start_time
 

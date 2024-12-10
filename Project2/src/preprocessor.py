@@ -105,7 +105,7 @@ class Preprocessor:
 
         self.task_set.simulator_timestep = find_gcd(temp_CTD_list)
 
-    def feasibility_check(self, is_print: bool) -> bool:
+    def feasibility_check(self, is_print: bool) -> NewBool:
         """
         Check if the taskset is feasible for the given scheduling algorithm, and if not sure, do simulation
         """
@@ -118,11 +118,11 @@ class Preprocessor:
             sum_utilisation += task.utilization
             if help_functions.is_greater(sum_utilisation, 1):
                 # if sum of utilisation > 1, not feasible, return False
-                return False
+                return NewBool.FALSE
         # if there is only one/no task in taskset
         if len(self.task_set.tasks) <= 1:
             if is_print: print("taskset has only one/no task, utiliasion check pass")
-            return True
+            return NewBool.TRUE
         # if taskset is implicit deadline
         if self.task_set.deadline_type == "implicit":
             # DM become RM, utilisation check possible:
@@ -130,10 +130,10 @@ class Preprocessor:
             n_task = len(self.task_set.tasks)
             if n_task > 0:
                 if sum_utilisation <= n_task * (2**(1/n_task) - 1):
-                    return True
+                    return NewBool.TRUE
             else:
                 if is_print: print("taskset has no task")
-                return True
+                return NewBool.TRUE
 
         if self.scheduling_algorithm == "dm":
             # There is exact schedulability test for dm
@@ -156,7 +156,7 @@ class Preprocessor:
                     if wcrt > task.deadline:
                         # already miss deadline, not feasible, return False
                         if is_print: print(f"{task.name} missed deadline at with wcrt >= {wcrt} > {task.deadline}")
-                        return False
+                        return NewBool.FALSE
                     
                     if wcrt == last_wcrt:
                         if is_print: print(f"{task.name} with wcrt = {wcrt} <= {task.deadline}, pass")
@@ -166,13 +166,13 @@ class Preprocessor:
                 
                 checked_tasks_list.append(task)
             # dm no need for simulation, exact feasibility check tells FTP feasibility
-            return True
+            return NewBool.TRUE
         
         if self.scheduling_algorithm == "edf":
             # edf is ideal for implicit deadline, utilisation check already passed
             if self.task_set.is_synchronous and self.task_set.deadline_type == "implicit":
                 if is_print: print(f"taskset is synchronous and implicit deadline, no need for simulation")
-                return True
+                return NewBool.TRUE
             # else, must do simulation
 
         # round robin always need simulation
@@ -181,10 +181,9 @@ class Preprocessor:
 
         # simulation
         self.do_simulation = True
-        return False
+        return NewBool.CANNOT_TELL
 
-
-    def preprocess(self, is_print: bool = False) -> bool:
+    def preprocess(self, is_print: bool = False) -> NewBool:
         """
         Preprocess the taskset to seek shortcuts
         """

@@ -1,5 +1,6 @@
 from datatypes import *
 import scheduling_functions
+import simulation_functions
 import help_functions
 
 class Processor:
@@ -11,13 +12,14 @@ class Processor:
         self.load = 0.0
         # a log of string for simulation
         self.log = []
+        self.need_simulation = False
 
     def __str__(self):
         # show id, capacity, load. load only show 2 decimal places
         return f"Processor{self.processor_id}: Capacity: {self.capacity}, Load: {self.load:.2f}"
     
     def schedule(self, scheduling_function, time_max: int, time_step: int) -> bool:
-        return scheduling_functions.schedule(self.task_set, scheduling_function, time_max, time_step, processor=self)
+        return simulation_functions.schedule(self.task_set, scheduling_function, time_max, time_step, processor=self)
 
 class Partitioner:
     def __init__(self, task_set: TaskSet, processors: List[Processor], ordering) -> None:
@@ -25,7 +27,7 @@ class Partitioner:
         self.processors = processors
         self.ordering = ordering
 
-    def partition(self, partition_method: str):
+    def partition(self, partition_method: str)-> bool:
         # check task_set.tasks list is not empty
         if len(self.task_set.tasks) == 0:
             print("partioner: Task set is empty")
@@ -63,7 +65,7 @@ class Partitioner:
         return is_partion_success
 
     # First Fit, Next Fit, Best Fit and Worst Fit
-    def first_fit(self):
+    def first_fit(self)-> bool:
         # scan the processors list, find the first free processor and assign the task to it
         for task in self.task_set.tasks:
             print(task)
@@ -82,7 +84,7 @@ class Partitioner:
         print("first_fit: partitioned successfully")
         return True
             
-    def next_fit(self):
+    def next_fit(self)-> bool:
         # Next-ﬁt: assign it to the current processor being considered, and if it cannot ﬁt, it moves to the next available processor. 
         # It can never be assigned to the previous processors.
         taskset_list = self.task_set.tasks.copy()
@@ -104,7 +106,7 @@ class Partitioner:
             print("next_fit: partitioned successfully")
             return True
 
-    def best_fit(self):
+    def best_fit(self)-> bool:
         # Best-ﬁt: assign it to an eligible processor with the maximum load U(tau)
         for task in self.task_set.tasks:
             best_processor = None
@@ -136,7 +138,7 @@ class Partitioner:
         print("best_fit: partitioned successfully")
         return True
 
-    def worst_fit(self):
+    def worst_fit(self)-> bool:
         # Worst-ﬁt: assign it to an eligible processor with the minimum load U(tau)
         for task in self.task_set.tasks:
             worst_processor = None

@@ -8,6 +8,7 @@ import os
 
 import concurrent.futures
 
+cannot_tell: bool = False
 
 def parseArgs():
     """
@@ -107,6 +108,35 @@ if __name__ == "__main__":
                 prep_is_feasible = preprocessor.preprocess()
                 processor.log.append(f"{processor} preprocess passed? : {prep_is_feasible}")
                 if not prep_is_feasible and preprocessor.do_simulation:
+                    # sychronize the taskset first, if the synchronous passed, asynchronous also pass
+                    synchronous_taskset = processor.task_set.synchronize_self()
+                    preprocessor_synchronous = Preprocessor(synchronous_taskset, "edf")
+                    synchronous_prep_is_feasible = preprocessor_synchronous.preprocess()
+                    processor.log.append(f"synchronous preprocess passed? : {synchronous_prep_is_feasible}")
+                    print(f"{synchronous_prep_is_feasible}")
+
+                    if synchronous_prep_is_feasible:
+                        processor.log.append(f"synchronous taskset preprocess passed, asynchronous must also pass, no need to simulate")
+                        return synchronous_prep_is_feasible, False
+                    if not synchronous_prep_is_feasible and preprocessor_synchronous.do_simulation:
+                        # if the synchronous preprocess failed, but the preprocessor.do_simulation is true, then we need to simulate
+                        # the synchronous taskset
+                        schedulePassed = scheduling_functions.schedule(task_set=synchronous_taskset,
+                                                                       scheduling_function=early_deadline_first,
+                                                                       time_max=synchronous_taskset.feasibility_interval, 
+                                                                       time_step=synchronous_taskset.simulator_timestep,
+                                                                       processor=processor)
+                        processor.log.append(f"synchronous simulation passed? : {schedulePassed}")
+                        print(f"synchronous simulation passed? : {schedulePassed}")
+                        if schedulePassed:
+                            return schedulePassed, True
+                    
+                    # if the synchronous all failed, and the preprocessor.do_simulation is true, 
+                    # then we need to simulate the asynchronous taskset
+                    if processor.task_set.feasibility_interval > 1e7:
+                        processor.log.append(f"feasibility interval is too large, can't tell feasiblity")
+                        cannot_tell = True
+                        return False, False
                     processor.log.append(f"preprocess.do_simulation = {preprocessor.do_simulation}, feasibility interval = {processor.task_set.feasibility_interval}, simulator timestep = {processor.task_set.simulator_timestep}")
                     schedulePassed = processor.schedule(scheduling_function=early_deadline_first, time_max=processor.task_set.feasibility_interval, time_step=processor.task_set.simulator_timestep)
                     processor.log.append(f"Simulation passed? : {schedulePassed}")
@@ -169,9 +199,10 @@ if __name__ == "__main__":
        print("exit 2")
        exit(2)
     elif not is_feasible and not need_simulation:
-       print("exit 3")
-       exit(3)
+        if cannot_tell:
+            print("exit 4")
+            exit(4)
+        print("exit 3")
+        exit(3)
     else:
-       print("exit 4")
-       exit(4)
-    
+        pass
