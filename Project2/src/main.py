@@ -222,9 +222,6 @@ if __name__ == "__main__":
             print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
             schedulePassed = schedule_global_edf_k(task_set, task_set.feasibility_interval, task_set.simulator_timestep, k_of_edf, num_cores)
             print(f"Simulation passed? : {schedulePassed}")
-
-    if is_feasible is None or need_simulation is None:
-       raise ValueError(f"is_feasible and need_simulation must be set to True or False. Currently: is_feasible = {is_feasible}, need_simulation = {need_simulation}")
     
     if is_feasible and need_simulation:
        print("exit 0")
@@ -242,4 +239,4 @@ if __name__ == "__main__":
         print("exit 3")
         exit(3)
     else:
-        raise ValueError(f"Unexpected value: is_feasible = {is_feasible}, need_simulation = {need_simulation}")
+        raise ValueError(f"is_feasible and need_simulation must be set to True or False. Currently: is_feasible = {is_feasible}, need_simulation = {need_simulation}")
