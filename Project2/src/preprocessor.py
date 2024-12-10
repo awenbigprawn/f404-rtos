@@ -250,7 +250,6 @@ class Preprocessor:
         print(f"k+1 sum utilisation: {k_plus1_sum_utilisation}")
 
         total_utilization = sum(task.utilization for task in task_set.tasks)
-        max_utilization = max(task.utilization for task in task_set.tasks)
         print(f"Total utilization: {total_utilization}")
         
         if help_functions.is_greater(total_utilization, num_cores):

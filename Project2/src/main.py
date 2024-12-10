@@ -115,25 +115,18 @@ if __name__ == "__main__":
                                           time_max=synchronous_taskset.feasibility_interval, 
                                           time_step=synchronous_taskset.simulator_timestep,
                                           processor=processor)
-                processor.log.append(f"synchronous simulation passed? : {schedulePassed}")
 
                 if schedulePassed:
                     return NewBool.TRUE
                 
                 # synchronous simulation failed, start asynchronous simulation
-                # check the feasibility_interval first, because the asynchrounous simulation will not stop early
-                if processor.task_set.feasibility_interval > 1e9:
-                    processor.log.append(f"feasibility_interval too large, cannot tell")
-                    return NewBool.CANNOT_TELL
-                
+                # check the feasibility_interval first, because the asynchrounous simulation will not stop early                
                 schedulePassed = processor.schedule(
                     scheduling_function=early_deadline_first,
                     time_max=processor.task_set.feasibility_interval,
                     time_step=processor.task_set.simulator_timestep
                 )
-                processor.log.append(f"Simulation passed? : {schedulePassed}")
                 return schedulePassed
-
 
             def process_processor(processor: Processor) -> NewBool:
                 # sychronize the taskset first, if the synchronous passed, asynchronous also pass
