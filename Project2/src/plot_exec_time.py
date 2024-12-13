@@ -18,6 +18,7 @@ def time_execution(taskset, worker_count):
 def main():
     tasksets_dir = 'tasksets'
     tasksets = get_tasksets(tasksets_dir)
+    #tasksets = tasksets[:100]
 
     #tasksets.remove('tasksets\\taskset-39')
     #tasksets.remove('tasksets\\taskset-734')
@@ -47,7 +48,7 @@ def main():
     plt.xlabel('Number of workers')
     plt.ylabel('Average execution time (seconds)')
     plt.title('Average execution time vs number of workers')
-    plt.savefig('./docu/average_execution_time_second_version.png')
+    plt.savefig('./docu/average_execution_time_slowdown.png')
     plt.show()
 
     

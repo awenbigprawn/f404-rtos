@@ -3,6 +3,7 @@ from scheduling_functions import *
 from partitioner import Processor
 from typing import List
 import myglobal
+import time
 
 
 def schedule(task_set: TaskSet, scheduling_function, 
@@ -52,6 +53,7 @@ def schedule(task_set: TaskSet, scheduling_function,
             if job.computing_time == 0:
                 jobs.remove(job)
         # move to next step
+        time.sleep(1e-5)
         current_time += time_step
     return NewBool.TRUE    
 

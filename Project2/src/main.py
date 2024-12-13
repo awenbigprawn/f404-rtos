@@ -82,7 +82,7 @@ if __name__ == "__main__":
             "wf": "worst_fit"
         }.get(heuristic)
         partition_is_possible = partitioner.partition(partitioner_method)
-        print(f"Partitioner passed? : {partition_is_possible}\n")
+        # print(f"Partitioner passed? : {partition_is_possible}\n")
 
         if partition_is_possible:
             infeasible_detected = threading.Event()
@@ -166,8 +166,8 @@ if __name__ == "__main__":
             for processor in processor_list:
                 simulation_results.append(processor.need_simulation)
 
-            print(f"Results: {results}")
-            print(f"need_simulation: {simulation_results}")
+            # print(f"Results: {results}")
+            # print(f"need_simulation: {simulation_results}")
             
             if NewBool.FALSE in results:
                 # if there exists NewBool.FALSE in results, is_feasible is False
@@ -185,14 +185,14 @@ if __name__ == "__main__":
             
             need_simulation = any(processor.need_simulation for processor in processor_list)
 
-            for processor in processor_list:
-                print(processor)
-                print(processor.task_set)
-                for msg in processor.log:
-                    print(msg)
-                print("")
-            print(f"Overall scheduling passed? : {is_feasible}")
-            print(f"Need simulation? : {need_simulation}")
+            # \for processor in processor_list:
+                # print(processor)
+                # print(processor.task_set)
+                # for msg in processor.log:
+                    # print(msg)
+                # print("")
+            # print(f"Overall scheduling passed? : {is_feasible}")
+            # print(f"Need simulation? : {need_simulation}")
         else:
             is_feasible = False
             need_simulation = False
@@ -200,21 +200,21 @@ if __name__ == "__main__":
     elif scheduling_algorithm == "global":
         preprocessor = Preprocessor(task_set, "edf")
         is_feasible, need_simulation = preprocessor.preprocess_global_edf(task_set, num_cores)
-        print(f"Feasibility check preprocess passed? : {is_feasible}")
+        # print(f"Feasibility check preprocess passed? : {is_feasible}")
         if not is_feasible and need_simulation:
-            print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
+            # print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
             schedulePassed = schedule_global_edf(task_set, task_set.feasibility_interval, task_set.simulator_timestep, num_cores)
-            print(f"Simulation passed? : {schedulePassed}")
+            # print(f"Simulation passed? : {schedulePassed}")
 
     else:
-        print(f"edf(k), k = {scheduling_algorithm}")
+        # print(f"edf(k), k = {scheduling_algorithm}")
         k_of_edf = int(scheduling_algorithm)
         preprocessor = Preprocessor(task_set, "edf")
         is_feasible, need_simulation = preprocessor.preprocess_global_edf_k(task_set, num_cores, k_of_edf)
         if not is_feasible and need_simulation:
-            print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
+            # print(f"preprocess.do_simulation = {need_simulation}, feasibility interval = {task_set.feasibility_interval}, simulator timestep = {task_set.simulator_timestep}")
             schedulePassed = schedule_global_edf_k(task_set, task_set.feasibility_interval, task_set.simulator_timestep, k_of_edf, num_cores)
-            print(f"Simulation passed? : {schedulePassed}")
+            # print(f"Simulation passed? : {schedulePassed}")
     
     if is_feasible and need_simulation:
        print("exit 0")

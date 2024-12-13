@@ -8,7 +8,7 @@ class Preprocessor:
         self.scheduling_algorithm = scheduling_algorithm
         self.do_simulation = False
 
-    def check_taskset_properties(self, is_print: bool = True):
+    def check_taskset_properties(self, is_print: bool = False):
         """
         check synchronous, constrained deadline, implicit deadline
         """
@@ -105,7 +105,7 @@ class Preprocessor:
 
         self.task_set.simulator_timestep = find_gcd(temp_CTD_list)
 
-    def feasibility_check(self, is_print: bool) -> NewBool:
+    def feasibility_check(self, is_print: bool) -> bool:
         """
         Check if the taskset is feasible for the given scheduling algorithm, and if not sure, do simulation
         """
@@ -118,11 +118,11 @@ class Preprocessor:
             sum_utilisation += task.utilization
             if help_functions.is_greater(sum_utilisation, 1):
                 # if sum of utilisation > 1, not feasible, return False
-                return NewBool.FALSE
+                return False
         # if there is only one/no task in taskset
         if len(self.task_set.tasks) <= 1:
             if is_print: print("taskset has only one/no task, utiliasion check pass")
-            return NewBool.TRUE
+            return True
         # if taskset is implicit deadline
         if self.task_set.deadline_type == "implicit":
             # DM become RM, utilisation check possible:
@@ -130,10 +130,10 @@ class Preprocessor:
             n_task = len(self.task_set.tasks)
             if n_task > 0:
                 if sum_utilisation <= n_task * (2**(1/n_task) - 1):
-                    return NewBool.TRUE
+                    return True
             else:
                 if is_print: print("taskset has no task")
-                return NewBool.TRUE
+                return True
 
         if self.scheduling_algorithm == "dm":
             # There is exact schedulability test for dm
@@ -156,7 +156,7 @@ class Preprocessor:
                     if wcrt > task.deadline:
                         # already miss deadline, not feasible, return False
                         if is_print: print(f"{task.name} missed deadline at with wcrt >= {wcrt} > {task.deadline}")
-                        return NewBool.FALSE
+                        return False
                     
                     if wcrt == last_wcrt:
                         if is_print: print(f"{task.name} with wcrt = {wcrt} <= {task.deadline}, pass")
@@ -166,13 +166,13 @@ class Preprocessor:
                 
                 checked_tasks_list.append(task)
             # dm no need for simulation, exact feasibility check tells FTP feasibility
-            return NewBool.TRUE
+            return True
         
         if self.scheduling_algorithm == "edf":
             # edf is ideal for implicit deadline, utilisation check already passed
             if self.task_set.is_synchronous and self.task_set.deadline_type == "implicit":
                 if is_print: print(f"taskset is synchronous and implicit deadline, no need for simulation")
-                return NewBool.TRUE
+                return True
             # else, must do simulation
 
         # round robin always need simulation
@@ -181,9 +181,10 @@ class Preprocessor:
 
         # simulation
         self.do_simulation = True
-        return NewBool.CANNOT_TELL
+        return False
 
-    def preprocess(self, is_print: bool = False) -> NewBool:
+
+    def preprocess(self, is_print: bool = False) -> bool:
         """
         Preprocess the taskset to seek shortcuts
         """
@@ -206,7 +207,7 @@ class Preprocessor:
         need_simulation is True if we need to simulate to determine schedulability.
         """
         self.set_feasibility_interval()
-        self.check_taskset_properties(True)
+        self.check_taskset_properties(False)
 
         total_utilization = sum(task.utilization for task in task_set.tasks)
         max_utilization = max(task.utilization for task in task_set.tasks)
@@ -237,7 +238,7 @@ class Preprocessor:
         need_simulation is True if we need to simulate to determine schedulability.
         """
         self.set_feasibility_interval()
-        self.check_taskset_properties(True)
+        self.check_taskset_properties(False)
         # sort the tasks by utilisation from large to small
         task_set.tasks = sorted(task_set.tasks, key=lambda task: task.utilization, reverse=True)
         print(task_set)
@@ -250,6 +251,7 @@ class Preprocessor:
         print(f"k+1 sum utilisation: {k_plus1_sum_utilisation}")
 
         total_utilization = sum(task.utilization for task in task_set.tasks)
+        max_utilization = max(task.utilization for task in task_set.tasks)
         print(f"Total utilization: {total_utilization}")
         
         if help_functions.is_greater(total_utilization, num_cores):
